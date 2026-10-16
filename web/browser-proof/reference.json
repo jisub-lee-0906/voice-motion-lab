@@ -1,0 +1,89 @@
+{
+  "format": "voice-motion-browser-inference-proof",
+  "version": 1,
+  "scope": "Technical test: first raw 43844 PCM samples only; not a complete audio analysis port.",
+  "fixture": {
+    "path": "../production/audio/bop-bounce.wav",
+    "synthetic": true,
+    "file_sha256": "c59ffc6c6469e57ece744166711bc0fb9a47c8c7306e99592b206712d83f8f51",
+    "sample_rate": 22050,
+    "sample_count": 43844,
+    "normalization": "signed PCM16 / 32768",
+    "input_float32_sha256": "321cae76bfbbdcc147c4480956b52d363837ddb696d1cf223faa5157d6fd22a8"
+  },
+  "runtime": {
+    "name": "onnxruntime",
+    "version": "1.31.0",
+    "provider": "CPUExecutionProvider",
+    "threads": 1,
+    "load_ms": 28.152699989732355,
+    "inference_ms": 27.54440001444891
+  },
+  "input": {
+    "name": "serving_default_input_2:0",
+    "shape": [
+      1,
+      43844,
+      1
+    ],
+    "dtype": "float32"
+  },
+  "model_sha256": "2c3c1d144bfa61ad236e92e169c13535c880469a12a047d4e73451f2c059a0ec",
+  "comparison_tolerances": {
+    "absolute": 0.0001,
+    "relative": 0.001
+  },
+  "outputs": {
+    "StatefulPartitionedCall:2": {
+      "shape": [
+        1,
+        172,
+        88
+      ],
+      "dtype": "float32",
+      "count": 15136,
+      "finite": true,
+      "min": 0.02891954779624939,
+      "max": 0.9245524406433105,
+      "sum": 1578.2687270343304,
+      "mean": 0.10427251103556623,
+      "rms": 0.12030092790856475,
+      "weighted_checksum": 2360.7656202534754,
+      "sha256_informational": "054ba83039de9e5057cedc4895e674b358caeef704c0079224696c33f5c1a6f8"
+    },
+    "StatefulPartitionedCall:1": {
+      "shape": [
+        1,
+        172,
+        88
+      ],
+      "dtype": "float32",
+      "count": 15136,
+      "finite": true,
+      "min": 0.08132433891296387,
+      "max": 0.863896369934082,
+      "sum": 1622.2781962156296,
+      "mean": 0.10718011338633916,
+      "rms": 0.12101716501062595,
+      "weighted_checksum": 2425.6130243791526,
+      "sha256_informational": "029b4a2d0f1cd5c36745f81e1abd160838779d58f7521d18ad57743148411a5e"
+    },
+    "StatefulPartitionedCall:0": {
+      "shape": [
+        1,
+        172,
+        264
+      ],
+      "dtype": "float32",
+      "count": 45408,
+      "finite": true,
+      "min": 0.055573105812072754,
+      "max": 0.5466536283493042,
+      "sum": 4641.5225620269775,
+      "mean": 0.10221816776838834,
+      "rms": 0.10514573154932856,
+      "weighted_checksum": 6942.162642048531,
+      "sha256_informational": "e8444811afbc21b2f30538c70023a66162c00aac8197a57530347faaf0c86912"
+    }
+  }
+}

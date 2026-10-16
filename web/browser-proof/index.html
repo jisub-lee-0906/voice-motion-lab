@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Basic Pitch 브라우저 추론 기술 검증</title>
+  <link rel="stylesheet" href="proof.css">
+  <script type="module" src="proof.mjs"></script>
+</head>
+<body>
+  <main>
+    <p class="eyebrow">VOICE MOTION LAB · TECHNICAL TEST</p>
+    <h1>Basic Pitch, 브라우저에서 직접 실행</h1>
+    <p>완성 앱이 아닌 추론 호환성 검증입니다. 공개된 합성 데모의 첫 43,844개 샘플을 실제 ONNX 모델에 넣고, Python CPU 기준값과 숫자를 비교합니다.</p>
+    <p>음성 업로드·마이크 접근 없이 정적 파일만 읽습니다. CPU WASM 단일 스레드가 별도 Worker에서 실행됩니다.</p>
+    <audio controls preload="none" src="../production/audio/bop-bounce.wav"></audio>
+    <div class="actions"><button id="run" type="button">실제 브라우저 추론 실행</button><span id="status" role="status">준비됨</span></div>
+    <section id="summary" hidden aria-live="polite"></section>
+    <details><summary>기술 결과 JSON</summary><pre id="result">아직 실행하지 않았습니다.</pre></details>
+    <p class="fine">이 검증은 전체 음성 분석, 모션 변환, 모바일 성능 또는 Comfy SDK 통합의 완료를 의미하지 않습니다. 외부 CDN은 사용하지 않습니다.</p>
+  </main>
+</body>
+</html>

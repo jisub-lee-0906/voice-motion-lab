@@ -17,6 +17,9 @@ submission. The next product direction is a playful, accessible sound-to-mascot
 web app: choose a character, perform for five seconds, preview, save a video.
 See [the production plan](docs/PRODUCTION_PLAN.md) for browser/server boundaries
 and the planned official SDK integration.
+The [browser inference proof](docs/BROWSER_PROOF.md) now demonstrates actual
+single-thread CPU WASM model execution. The full browser-only play mode is not yet
+implemented; the Studio below still uses its local Python/Comfy analysis service.
 
 ## Watch the BOP! production tests
 

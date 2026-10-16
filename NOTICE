@@ -12,3 +12,8 @@ ComfyUI is a separate optional runtime, licensed under GPL-3.0.
 https://github.com/Comfy-Org/ComfyUI
 Its source and dependencies are installed separately under ignored project-owned
 runtime/environment directories, never in the user's existing installation.
+
+The optional browser inference proof downloads Microsoft ONNX Runtime Web 1.30.0,
+licensed under MIT, from the official npm package. Its original license and the
+Basic Pitch license are preserved with ignored runtime assets. No runtime binary
+is committed. Exact source URLs, integrity and hashes are in the proof manifest.

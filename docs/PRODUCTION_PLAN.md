@@ -18,9 +18,11 @@ understanding of sounds.
 
 - The present Basic Pitch ONNX model is about 225 KiB and runs on CPU. A permanent
   GPU server is not required for the current feature set.
-- Browser inference is a research target, not a verified capability of this build.
-  Test the actual model with a supported WASM runtime on ordinary mobile devices
-  before choosing a static-only public deployment.
+- A desktop browser proof now runs the actual model with single-thread WASM.
+  The first 43,844 PCM samples (~1.99 seconds) took 71.9ms in one observed run,
+  with aggregate output statistics matching Python within stated tolerances.
+  See [the proof](BROWSER_PROOF.md). The full audio/microphone analysis pipeline
+  and mobile performance are not yet ported or verified.
 - Canvas preview, SVG generation and video recording already happen in the
   browser. Original audio need not be uploaded merely to create a downloadable
   video if analysis can move into the browser.
@@ -67,7 +69,7 @@ contest eligibility.
 
 1. A playful first-use UI; microphone errors, stop/retry and mobile use tested with
    consenting people. Starter characters require no SVG knowledge.
-2. Browser inference feasibility and CPU hosting load measured; a chosen, bounded
+2. Full browser analysis port and mobile performance measured; a chosen, bounded
    deployment architecture. Preserve the user's existing Studio isolation.
 3. Actual official SDK workflow → output bytes → UI integration proven end to end.
 4. Production exports: predictable framing, intentional ending/loop behavior,

@@ -1,0 +1,50 @@
+{
+  "package": "onnxruntime-web",
+  "version": "1.30.0",
+  "license": "MIT",
+  "registry_metadata": "https://registry.npmjs.org/onnxruntime-web/1.30.0",
+  "tarball": "https://registry.npmjs.org/onnxruntime-web/-/onnxruntime-web-1.30.0.tgz",
+  "integrity": "sha512-q0y+JrrtukXSzsBWEMccVfqX25LRmosXHF+CaRJmg8pZClzcV7svNc4rKY3jL02Vb7QmRMDs1SigqR4CXAfKYQ==",
+  "download_bytes": 33107658,
+  "tarball_bytes": 33106585,
+  "runtime_license_source": "https://raw.githubusercontent.com/microsoft/onnxruntime/v1.30.0/LICENSE",
+  "extracted_bytes": 14557305,
+  "model": {
+    "name": "Spotify Basic Pitch ICASSP 2022",
+    "license": "Apache-2.0",
+    "commit": "fa5997af0a8210982619003269994a1be25eddf3",
+    "sha256": "2c3c1d144bfa61ad236e92e169c13535c880469a12a047d4e73451f2c059a0ec"
+  },
+  "files": [
+    {
+      "name": "ort.wasm.min.mjs",
+      "bytes": 50126,
+      "sha256": "219e6a1fc8a9938268d18efca3c91d310bd2f4a59bbd13744df5b2b7fc6cee3b"
+    },
+    {
+      "name": "ort-wasm-simd-threaded.mjs",
+      "bytes": 24381,
+      "sha256": "e13f7f94fc51b4ca72b12faeb1ee95f4ace6dfbc8939bc718aabdc0a27c4299b"
+    },
+    {
+      "name": "ort-wasm-simd-threaded.wasm",
+      "bytes": 14239897,
+      "sha256": "3398c10d07d229bd91b364548e130e0e51a8e5704b88c7c083ebbeb78842dee2"
+    },
+    {
+      "name": "ONNXRUNTIME_LICENSE",
+      "bytes": 1073,
+      "sha256": "2f07c72751aed99790b8a4869cf2311df85a860b22ded05fa22803587a48922c"
+    },
+    {
+      "name": "basic_pitch.onnx",
+      "bytes": 230444,
+      "sha256": "2c3c1d144bfa61ad236e92e169c13535c880469a12a047d4e73451f2c059a0ec"
+    },
+    {
+      "name": "BASIC_PITCH_LICENSE",
+      "bytes": 11384,
+      "sha256": "929c910bae2152fa87199a5d0660e09263419b7eee6d4b301d05ee2aaf211c37"
+    }
+  ]
+}

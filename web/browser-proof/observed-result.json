@@ -1,0 +1,251 @@
+{
+  "format": "voice-motion-browser-inference-proof",
+  "version": 1,
+  "scope": "Technical test: first raw 43844 PCM samples only; not a complete audio analysis port.",
+  "runtime": {
+    "package": "onnxruntime-web",
+    "version": "1.30.0",
+    "provider": "wasm",
+    "threads": 1,
+    "worker": true,
+    "actual_inference": true,
+    "cross_origin_isolated": false
+  },
+  "model_sha256": "2c3c1d144bfa61ad236e92e169c13535c880469a12a047d4e73451f2c059a0ec",
+  "input": {
+    "name": "serving_default_input_2:0",
+    "shape": [
+      1,
+      43844,
+      1
+    ],
+    "dtype": "float32",
+    "sample_rate": 22050,
+    "input_float32_sha256": "321cae76bfbbdcc147c4480956b52d363837ddb696d1cf223faa5157d6fd22a8",
+    "fixture_sha256": "c59ffc6c6469e57ece744166711bc0fb9a47c8c7306e99592b206712d83f8f51"
+  },
+  "timing": {
+    "model_prepare_ms": 200.69999998807907,
+    "inference_ms": 71.90000000596046
+  },
+  "outputs": {
+    "StatefulPartitionedCall:2": {
+      "shape": [
+        1,
+        172,
+        88
+      ],
+      "dtype": "float32",
+      "count": 15136,
+      "finite": true,
+      "min": 0.02891954779624939,
+      "max": 0.9245508313179016,
+      "sum": 1578.2700600624084,
+      "mean": 0.10427259910560309,
+      "rms": 0.1203011100688165,
+      "weighted_checksum": 2360.767143526048,
+      "sha256_informational": "26656e2c0ab30d51efcb78582c20a37786daeb0b604f6fcb16baa2a2bb1f29b8"
+    },
+    "StatefulPartitionedCall:1": {
+      "shape": [
+        1,
+        172,
+        88
+      ],
+      "dtype": "float32",
+      "count": 15136,
+      "finite": true,
+      "min": 0.08132964372634888,
+      "max": 0.8638920783996582,
+      "sum": 1622.2802087068558,
+      "mean": 0.10718024634691171,
+      "rms": 0.12101750876576996,
+      "weighted_checksum": 2425.616050365787,
+      "sha256_informational": "b9ffd3c994658409b6d8212aa384d676432a173487a1515b0c186291acf57806"
+    },
+    "StatefulPartitionedCall:0": {
+      "shape": [
+        1,
+        172,
+        264
+      ],
+      "dtype": "float32",
+      "count": 45408,
+      "finite": true,
+      "min": 0.05557712912559509,
+      "max": 0.5466368198394775,
+      "sum": 4641.522461652756,
+      "mean": 0.10221816555789191,
+      "rms": 0.10514570291326784,
+      "weighted_checksum": 6942.162723051814,
+      "sha256_informational": "db20ca8c812566edca75cb4dce71ee97acd9acd0bfb092bd32b9ea1d7a9024a9"
+    }
+  },
+  "features": {
+    "note_peak": 0.8638920783996582,
+    "onset_peak": 0.9245508313179016,
+    "contour_peak": 0.5466368198394775
+  },
+  "comparison": {
+    "pass": true,
+    "scope": "Aggregate numeric equivalence, not elementwise/full-analysis validation.",
+    "tolerances": {
+      "absolute": 0.0001,
+      "relative": 0.001
+    },
+    "output_sha256_is_informational": true,
+    "checks": [
+      {
+        "name": "same_model_sha256",
+        "pass": true
+      },
+      {
+        "name": "same_fixture_sha256",
+        "pass": true
+      },
+      {
+        "name": "same_input_float32_sha256",
+        "pass": true
+      },
+      {
+        "name": "StatefulPartitionedCall:2:shape",
+        "pass": true
+      },
+      {
+        "name": "StatefulPartitionedCall:2:finite_float32",
+        "pass": true
+      },
+      {
+        "name": "StatefulPartitionedCall:2:min",
+        "pass": true,
+        "absolute_error": 0,
+        "allowed_error": 0.0001289195477962494
+      },
+      {
+        "name": "StatefulPartitionedCall:2:max",
+        "pass": true,
+        "absolute_error": 0.0000016093254089355469,
+        "allowed_error": 0.0010245524406433107
+      },
+      {
+        "name": "StatefulPartitionedCall:2:sum",
+        "pass": true,
+        "absolute_error": 0.0013330280780792236,
+        "allowed_error": 1.5783687270343303
+      },
+      {
+        "name": "StatefulPartitionedCall:2:mean",
+        "pass": true,
+        "absolute_error": 8.807003686051029e-8,
+        "allowed_error": 0.00020427251103556624
+      },
+      {
+        "name": "StatefulPartitionedCall:2:rms",
+        "pass": true,
+        "absolute_error": 1.8216025174377926e-7,
+        "allowed_error": 0.00022030092790856475
+      },
+      {
+        "name": "StatefulPartitionedCall:2:weighted_checksum",
+        "pass": true,
+        "absolute_error": 0.0015232725727400975,
+        "allowed_error": 2.3608656202534757
+      },
+      {
+        "name": "StatefulPartitionedCall:1:shape",
+        "pass": true
+      },
+      {
+        "name": "StatefulPartitionedCall:1:finite_float32",
+        "pass": true
+      },
+      {
+        "name": "StatefulPartitionedCall:1:min",
+        "pass": true,
+        "absolute_error": 0.000005304813385009766,
+        "allowed_error": 0.00018132433891296387
+      },
+      {
+        "name": "StatefulPartitionedCall:1:max",
+        "pass": true,
+        "absolute_error": 0.000004291534423828125,
+        "allowed_error": 0.0009638963699340821
+      },
+      {
+        "name": "StatefulPartitionedCall:1:sum",
+        "pass": true,
+        "absolute_error": 0.002012491226196289,
+        "allowed_error": 1.6223781962156296
+      },
+      {
+        "name": "StatefulPartitionedCall:1:mean",
+        "pass": true,
+        "absolute_error": 1.3296057255196558e-7,
+        "allowed_error": 0.00020718011338633917
+      },
+      {
+        "name": "StatefulPartitionedCall:1:rms",
+        "pass": true,
+        "absolute_error": 3.437551440027553e-7,
+        "allowed_error": 0.00022101716501062596
+      },
+      {
+        "name": "StatefulPartitionedCall:1:weighted_checksum",
+        "pass": true,
+        "absolute_error": 0.003025986634384026,
+        "allowed_error": 2.425713024379153
+      },
+      {
+        "name": "StatefulPartitionedCall:0:shape",
+        "pass": true
+      },
+      {
+        "name": "StatefulPartitionedCall:0:finite_float32",
+        "pass": true
+      },
+      {
+        "name": "StatefulPartitionedCall:0:min",
+        "pass": true,
+        "absolute_error": 0.000004023313522338867,
+        "allowed_error": 0.00015557310581207275
+      },
+      {
+        "name": "StatefulPartitionedCall:0:max",
+        "pass": true,
+        "absolute_error": 0.000016808509826660156,
+        "allowed_error": 0.0006466536283493043
+      },
+      {
+        "name": "StatefulPartitionedCall:0:sum",
+        "pass": true,
+        "absolute_error": 0.00010037422180175781,
+        "allowed_error": 4.641622562026978
+      },
+      {
+        "name": "StatefulPartitionedCall:0:mean",
+        "pass": true,
+        "absolute_error": 2.2104964247926517e-9,
+        "allowed_error": 0.00020221816776838834
+      },
+      {
+        "name": "StatefulPartitionedCall:0:rms",
+        "pass": true,
+        "absolute_error": 2.8636060717124323e-8,
+        "allowed_error": 0.00020514573154932855
+      },
+      {
+        "name": "StatefulPartitionedCall:0:weighted_checksum",
+        "pass": true,
+        "absolute_error": 0.00008100328341242857,
+        "allowed_error": 6.942262642048531
+      }
+    ]
+  },
+  "privacy": {
+    "audio_transmitted": false,
+    "microphone_requested": false,
+    "static_same_origin_resources_only": true,
+    "note": "Fixture/model/runtime fetched locally; no audio or inference arrays are sent over the network."
+  },
+  "environment": "One desktop Chromium run; not a mobile or full-pipeline benchmark."
+}
