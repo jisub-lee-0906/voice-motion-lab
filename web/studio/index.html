@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f3eb">
+  <title>Voice Motion Lab — 목소리로 연주하는 움직임</title>
+  <link rel="stylesheet" href="/style.css">
+  <script type="module" src="/app.mjs"></script>
+</head>
+<body>
+  <header class="masthead">
+    <a class="wordmark" href="/" aria-label="Voice Motion Lab 홈"><span class="brand-icon" aria-hidden="true">v<span>m</span></span><span>VOICE<br>MOTION LAB</span></a>
+    <div class="header-right"><span class="local-indicator"><i></i> LOCAL / CPU</span><span class="edition">CREATIVE INSTRUMENT · 001</span></div>
+  </header>
+  <main>
+    <section class="intro" aria-labelledby="page-title">
+      <div><p class="eyebrow">FROM YOUR VOICE, TO YOUR MOTION.</p><h1 id="page-title">움직임을 <span>연주하세요.</span></h1><p class="intro-copy">내 SVG를 올리고, 5초 동안 목소리로 타이밍을 만드세요.<br>움직임은 편집 가능한 곡선으로 남습니다.</p></div>
+      <div class="how-it-works"><span><b>01</b> 원본 넣기</span><i>↗</i><span><b>02</b> 목소리 연주</span><i>↗</i><span><b>03</b> 모션 가져가기</span></div>
+    </section>
+
+    <div class="studio">
+      <section class="workspace" aria-label="모션 미리보기와 타임라인">
+        <div class="stage-toolbar"><span><i class="live-dot"></i> MOTION STAGE <small>960 × 540</small></span><label class="subtle-check"><input id="show-guide" type="checkbox" checked> 경로 안내선</label></div>
+        <div class="stage-wrap"><canvas id="stage" width="960" height="540" aria-label="로고 모션 미리보기"></canvas><div class="stage-empty" id="stage-hint"><span class="stage-kicker">YOUR LOGO. YOUR TIMING.</span><p>아래에서 녹음하거나<br>합성 데모로 시작하세요.</p></div><span class="stage-corner">VML / PREVIEW</span><span class="stage-engine" id="stage-engine">아직 분석하지 않음</span></div>
+        <div class="transport"><button id="play" class="play-button" title="미리보기 재생" aria-label="미리보기 재생" disabled>▶</button><span class="timecode"><strong id="time-current">00.00</strong><span>/</span><span id="time-total">05.00</span></span><label class="subtle-check"><input id="play-audio" type="checkbox" checked> 원음 재생</label><div class="transport-spacer"></div><span class="take-label" id="take-label">NO TAKE</span></div>
+        <div class="waveform-wrap"><canvas id="waveform" width="1200" height="132" aria-label="녹음 파형과 타격 이벤트"></canvas><input id="timeline" type="range" min="0" max="5" step="0.001" value="0" aria-label="재생 위치" disabled><div class="ruler"><span>0s</span><span id="ruler-mid">2.5s</span><span id="ruler-end">5s</span></div></div>
+        <div class="signal-legend"><span><i class="legend-wave"></i> 발성 → 경로 진행</span><span><i class="legend-pitch"></i> 음높이 → 위아래 표현</span><span><i class="legend-impact"></i> 타격 → 탄성</span></div>
+        <div class="status" id="status" role="status" aria-live="polite"><span class="status-dot"></span><p id="status-text">로컬 분석 엔진을 확인하고 있습니다.</p></div>
+      </section>
+
+      <aside class="control-panel" aria-label="소재, 오디오, 모션 설정">
+        <section class="control-section"><div class="section-title"><span class="step-number">01</span><h2>원본 소재</h2><span class="micro-label">SVG</span></div><div class="asset-row"><div class="asset-thumb" id="asset-thumb" aria-hidden="true">✦</div><div class="asset-info"><strong id="asset-name">Studio spark.svg</strong><span id="asset-detail">샘플 벡터 · 원본 형태 유지</span></div><button id="asset-trigger" class="icon-button" title="SVG 바꾸기" aria-label="SVG 바꾸기">↥</button></div><input id="asset-file" type="file" accept=".svg,image/svg+xml" hidden><p class="field-note">스크립트·외부 이미지·웹폰트 없는 SVG, 최대 1MB</p></section>
+
+        <section class="control-section"><div class="section-title"><span class="step-number">02</span><h2>목소리 연주</h2><span class="micro-label">05 SEC</span></div><button id="record" class="record-button"><span class="mic-symbol" aria-hidden="true">●</span><span id="record-label">5초 녹음하고 분석</span><span id="record-clock">↗</span></button><div class="audio-actions"><button id="audio-trigger" class="secondary-button">오디오 가져오기 <span>↥</span></button><button id="demo" class="text-button">합성 데모 체험 ↗</button></div><input id="audio-file" type="file" accept="audio/*,.wav,.mp3,.m4a,.webm,.ogg,.flac" hidden><p class="field-note" id="audio-note">허밍으로 진행하고, 잠깐 멈추고, 짧게 소리를 내보세요.<br>합성 데모는 실제 목소리 녹음이 아닙니다.</p><div class="engine-row"><label for="engine">분석 방식</label><select id="engine"><option value="auto">자동 선택</option><option value="signal">신호 분석 · AI 아님</option><option value="basic_pitch">Basic Pitch · 공개 모델</option></select><button id="analyze" class="icon-button" title="현재 오디오 다시 분석" aria-label="현재 오디오 다시 분석" disabled>↻</button></div><details class="advanced-connection"><summary>고급 연결 정보</summary><label class="subtle-check comfy-option"><input id="use-comfy" type="checkbox" disabled> 독립 Comfy로 분석</label><small id="comfy-label">미설정</small></details><p class="privacy-note">◉ 오디오는 이 컴퓨터에서만 처리합니다.</p></section>
+
+        <section class="control-section"><div class="section-title"><span class="step-number">03</span><h2>움직임 조율</h2></div><div class="preset-group" role="group" aria-label="경로 프리셋"><button class="preset active" data-preset="fly" aria-pressed="true"><span>↗</span>플라이</button><button class="preset" data-preset="bounce" aria-pressed="false"><span>⌁</span>바운스</button><button class="preset" data-preset="orbit" aria-pressed="false"><span>↻</span>오빗</button></div><label class="slider-label" for="intensity"><span>움직임 강도</span><output id="intensity-value">100%</output></label><input id="intensity" type="range" min="0" max="1.8" step="0.01" value="1"><label class="slider-label" for="smoothing"><span>탄성 부드러움</span><output id="smoothing-value">35%</output></label><input id="smoothing" type="range" min="0" max="1" step="0.01" value="0.35"><div class="background-row"><label for="background">배경</label><input id="background" type="color" value="#10151f" aria-label="배경색"><label class="subtle-check"><input id="transparent" type="checkbox"> 투명</label></div></section>
+
+        <section class="export-section"><div class="export-heading"><h2>작업물 가져가기</h2><span>YOUR FILES, YOURS.</span></div><div class="export-grid"><button id="export-svg" class="export-primary" disabled>애니메이션 SVG <span>↗</span></button><button id="export-json" class="secondary-button" disabled>프로젝트 JSON ↧</button><button id="export-webm" class="secondary-button" disabled>영상 WebM ↧</button></div><label class="subtle-check export-audio"><input id="export-audio" type="checkbox" checked> WebM에 원음 포함</label><p class="field-note">SVG에는 원음이 들어가지 않습니다.<br>프로젝트 JSON에는 녹음 샘플과 실제 모션 키프레임이 포함됩니다.</p><button id="project-trigger" class="text-button project-import">프로젝트 JSON 다시 열기 ↥</button><input id="project-file" type="file" accept=".json,application/json" hidden></section>
+      </aside>
+    </div>
+    <footer><span>VOICE MOTION LAB <b>v0.1</b></span><p>음성의 의미를 추측하지 않습니다. 발성의 시간·음높이·타격으로 움직임을 만듭니다.</p><span id="health-label">LOCAL ENGINE</span></footer>
+  </main>
+</body>
+</html>

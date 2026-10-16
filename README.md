@@ -1,133 +1,131 @@
-# Voice Motion Lab
+# BOP! · Voice Motion Lab
 
-**움직임을 소리로 연기하면, 수정할 수 있는 애니메이션이 됩니다.**
+**캐릭터를 고르고, 5초만 소리 내면, 내 목소리 밈이 됩니다.**
 
-Upload an original SVG, record a five-second voice performance (or import audio),
-and make a motion clip. Sustained sound advances the path, silence holds it,
-voiced pitch adds vertical expression, and sharp attacks add elastic impacts.
-The app exports an animated SVG, an editable JSON project with sampled transform
-keyframes, and a WebM video with optional original audio.
+말랑 바운스 · 삐슝 비행 · 우주 둠칫 중 하나를 선택하고 녹음하세요.
+허밍의 높낮이, 소리의 크기와 타격에 캐릭터가 반응합니다. 움직임을 바로
+미리 보고, 원음이 담긴 세로 영상을 저장하거나 지원되는 기기에서 공유할 수
+있습니다. 로그인이나 영상 편집 지식은 필요하지 않습니다.
 
-This is a working local v0.1 prototype, not a submitted contest entry. Voice Motion
-does not infer arbitrary sound meanings. A sound such as “whoosh” is analyzed for
-its timing, pitch and energy, rather than interpreted as a natural-language command.
+**[로그인 없이 BOP! 체험하기](https://jisub-lee-0906.github.io/voice-motion-lab/)**
 
-**Development status:** this is a production-test prototype, not the final contest
-submission. The next product direction is a playful, accessible sound-to-mascot
-web app: choose a character, perform for five seconds, preview, save a video.
-See [the production plan](docs/PRODUCTION_PLAN.md) for browser/server boundaries
-and the planned official SDK integration.
-The [browser inference proof](docs/BROWSER_PROOF.md) now demonstrates actual
-single-thread CPU WASM model execution. The full browser-only play mode is not yet
-implemented; the Studio below still uses its local Python/Comfy analysis service.
+현재 **v0.2 공개 체험 빌드**입니다. 기본 화면의 분석과 영상 제작은 브라우저에서
+실행됩니다. 공개 HTTPS 사이트에서 실제 Basic Pitch 분석과 MP4 생성을 확인했습니다.
+실제 휴대폰 Safari와 다양한 사람의 마이크 녹음은 아직 실기기 확인이 남아 있습니다.
+대회 최종 제출본이나 출품 자격이 확인된 빌드가 아닙니다.
 
-## Watch the BOP! production tests
+## 이렇게 놀아요
 
-With the local app running, open **http://127.0.0.1:8793/production/index.html**.
-Three original mascots and original synthetic performances were uploaded and
-exported through the actual app and isolated Comfy analysis workflow. The gallery
-contains unchanged WebM/SVG/JSON exports, source SVG/WAV, and a hash manifest.
-All audio in this gallery is synthetic; no person's recording was published.
+1. 캐릭터 세 개 중 하나를 고릅니다.
+2. **5초 녹음하고 만들기**를 누르고 브라우저의 마이크 권한을 허용합니다.
+   허용된 뒤부터 5초를 세며, 중간에 취소할 수 있습니다.
+3. 움직임이 나타나면 영상 준비가 자동으로 이어집니다. 소리를 켜서 확인하고
+   **영상 저장** 또는 **친구에게 보내기**를 누릅니다.
 
-![BOP! production test](web/production/takes/bounce-poster.png)
+마이크 없이 **합성음 데모로 놀기**도 가능합니다. 데모는 사람이 녹음한
+목소리가 아닙니다. 같은 소리로 캐릭터를 바꾸거나 다시 녹음할 수 있습니다.
+도전 링크에는 캐릭터 선택만 담기며 목소리는 들어가지 않습니다.
 
-## Run on Windows
+기본 영상은 **720 × 960, 24fps, 5초**입니다. 지원되는 브라우저에서는
+WebCodecs로 H.264/AAC MP4를 먼저 시도하고, 지원 조건에 따라 WebM 또는
+실시간 MediaRecorder로 전환합니다. 실제 만들어진 파일 형식을 표시하며
+MP4를 모든 브라우저에 약속하지 않습니다. 실시간 전환 시 영상 준비가 끝날
+때까지 탭을 열어 두세요. 파일 공유를 지원하지 않는 기기에서는 다운로드를
+사용합니다. 모바일 화면·터치 조작·`playsinline`을 고려해 구현했으며 실기기
+호환성은 별도 검증 대상입니다.
 
-Python 3.12 is recommended. All installs are project-local.
+## 브라우저 안에서 처리합니다
+
+- 방문자에게 Python, ComfyUI, GPU 서버나 계정이 필요하지 않습니다.
+  배포자는 정적 파일을 HTTPS로 제공하면 됩니다.
+- 녹음은 현재 페이지의 메모리에서 분석·인코딩합니다. 기본 BOP! 화면에는
+  녹음 업로드, 원격 추론, 계정 또는 텔레메트리 요청이 없습니다.
+- 처음에는 약 **15MB 규모의 앱·분석 자산**을 받습니다. 핵심 모델·WASM·
+  라이선스 파일은 14,557,305바이트이며, 앱과 데모 등은 추가됩니다.
+  실제 전송량은 압축·캐시 상태에 따라 달라집니다.
+- 공개 모델 **Spotify Basic Pitch**를 Worker의 CPU WASM 한 스레드로 실행합니다.
+  모델·런타임을 사용할 수 없으면 실제 로컬 신호 분석으로 전환하고
+  **AI 모델을 사용하지 않음**을 표시합니다. 다른 서버로 몰래 전환하지 않습니다.
+- 서비스 워커는 공개 앱 파일, 모델, 캐릭터와 합성 데모를 캐시합니다.
+  사용자 녹음과 생성 영상은 캐시에 넣지 않습니다. 오프라인 재사용은 필요한
+  자산이 이미 캐시되어 있고 브라우저가 이를 보관한 경우에 가능합니다.
+- 저장·공유한 영상에는 원래 소리가 포함됩니다. 공유는 사용자가 누른
+  다운로드·기기 공유 동작으로 이루어집니다.
+
+마이크에는 브라우저의 기본 권한이 필요합니다. 녹음 버튼을 누르기 전에는
+마이크를 요청하지 않습니다. **HTTPS 또는 localhost**에서 열어야 하며,
+`index.html`을 파일로 직접 여는 방식은 지원하지 않습니다. 권한 거부,
+마이크 부재, 무음, 중단과 인코딩 실패에 대한 안내·재시도 흐름이 있습니다.
+말의 의미를 이해하는 모델은 아니며, 발성의 시간·음높이·에너지를 모션에 연결합니다.
+
+## 개발용 로컬 실행
+
+Windows와 Python 3.12 기준입니다. 준비 도구는 이 저장소의 전용 가상환경과
+무시된 런타임 폴더만 사용합니다. 브라우저 기본 모드에 ComfyUI 설치는 필요 없습니다.
 
 ```powershell
 ./setup.ps1 -Python python -WithModel
+./.venv/Scripts/python.exe tools/setup_browser_proof.py
+./.venv/Scripts/python.exe tools/setup_export_runtime.py
 ./start.ps1
 ```
 
-Open **http://127.0.0.1:8793**. Use **합성 데모 체험** first, or upload an SVG and
-record. The built-in demo and `tests/fixtures/synthetic-performance.wav` are
-synthetic, not recordings of a person.
+**http://127.0.0.1:8793/**에서 BOP!을 엽니다. 준비 시에만 공식 저장소와 npm에서
+고정 버전 자산을 받습니다. 실행 중에는 외부 CDN을 사용하지 않습니다.
 
-- Click recording yourself to grant microphone access. The app never requests it on load.
-- Import audio: up to 15 seconds; the browser decodes and downmixes locally.
-- Original SVG: up to 1 MiB, static vector profile. Scripts, remote images/fonts,
-  external URLs, foreign objects and active animation are rejected.
-- Choose Fly / Bounce / Orbit, adjust intensity and spring smoothness, then export.
-- Reopen a project JSON to edit and export again. JSON includes the original audio samples.
-- WebM export runs in real time in a foreground tab. Browser support for audio/video
-  recording is required. SVG contains animation but no audio.
-
-## Optional isolated Comfy workflow
-
-The current integration uses the native **ComfyUI Server API** (`/prompt`).
-An official Comfy SDK/API v2 integration is planned for the submission build;
-the current route is not a claim of confirmed contest eligibility.
-Do not install this pack into an
-existing ComfyUI. The supplied setup creates a separate CPU runtime inside this
-checkout and never connects to port 8188.
+독립 정적 사이트를 만들려면 준비가 끝난 뒤 다음을 실행합니다.
 
 ```powershell
-./tools/setup_comfy.ps1 -Python python
-./start-comfy.ps1
-# In a second terminal:
-./start.ps1 -WithComfy
+./.venv/Scripts/python.exe tools/build_static.py --out _site
 ```
 
-The separate runtime is pinned to ComfyUI commit
-`bdc63e72f5ab29fde448c161db3057827148c0ef` and uses port **8794**. CPU-only
-PyTorch and ONNX sessions avoid using GPU memory. CPU threads are capped at two.
-The advanced connection details in the app show whether the workflow route is enabled.
+`_site/`의 내용을 HTTPS 정적 호스트에 배포합니다. 빌드는 기존 파일을 지우지
+않으므로 출력 폴더는 비어 있어야 합니다. 모듈·Worker·모델 주소는 상대 경로여서
+저장소 이름이 붙는 하위 경로 배포도 고려했습니다. 호스트는 `.mjs`와 `.wasm`을
+올바르게 제공하고 WASM 실행을 허용해야 합니다. 정적 빌드에는 Python, API,
+사용자 녹음, 개발 출력물이나 고급 Studio가 포함되지 않습니다.
 
-`VoiceMotionAnalyze` turns mono samples into timed motion analysis.
-`VoiceMotionProject` packages source SVG, audio, settings and analysis as editable JSON.
-API and editable GUI examples are in `workflows/`. The web renderer is shared by
-preview and exports; the Comfy project node does not pretend to render a video.
+<a id="advanced-local-studio"></a>
 
-## Model and fallback
+## 선택형 고급 Studio와 Comfy
 
-`tools/setup_model.py` downloads the official Spotify Basic Pitch ONNX model from
-commit `fa5997af0a8210982619003269994a1be25eddf3`, into `.runtime/models/` only.
-SHA-256: `2c3c1d144bfa61ad236e92e169c13535c880469a12a047d4e73451f2c059a0ec`.
-The model is approximately 225 KiB and uses `CPUExecutionProvider`.
+개발용 로컬 서버의 **/studio/index.html**에는 SVG 가져오기, 오디오 가져오기,
+모션 조절, 편집 가능한 프로젝트 JSON·animated SVG·영상 내보내기가 남아 있습니다.
+이 고급 화면의 분석에는 프로젝트 Python 백엔드가 필요합니다. 저장한 프로젝트
+JSON에는 원래 오디오 샘플이 포함됩니다. 기존 합성 제작 결과는
+**/production/index.html**에서 볼 수 있습니다.
 
-Basic Pitch supplies pitch/onset features; deterministic signal processing and
-motion mapping produce the animation. The **signal** engine is a real fallback,
-explicitly labeled “AI 아님”. Explicit model mode fails clearly when the model is
-unavailable; auto mode reports a warning when it falls back. No paid API is used.
+Comfy 경로는 선택 사항입니다. `tools/setup_comfy.ps1`, `start-comfy.ps1`,
+`start.ps1 -WithComfy`는 이 프로젝트의 독립 CPU 환경과 **8794** 포트만 사용합니다.
+현재 고급 Studio의 Comfy 호출은 실제 노드를 실행하는 native `/prompt` 방식입니다.
+**공식 Comfy SDK/API v2 연결은 아직 구현하지 않았습니다.**
+브라우저 기본 모드는 이 경로를 호출하지 않습니다.
+대회 요구사항과 의미 있는 SDK 역할은 [현재 제작 계획](docs/PRODUCTION_PLAN.md)에
+별도로 기록했습니다.
 
-## Isolation
+## 격리와 검증
 
-Everything belongs to this checkout: `.venv`, `.comfy-venv`, `.runtime`, `.cache`,
-`models`, `input`, `output`, `temp`, and `user`. Neither setup script reads existing
-Comfy configuration or shared models. The optional Comfy runtime loads only this
-project's custom pack and disables partner nodes/internet in its frontend.
-
-Run `./.venv/Scripts/python.exe tools/check_resources.py` before starting heavier
-experiments. It reads available RAM, disk and target ports without controlling
-other jobs. Shutdown is limited to terminals/processes started for this checkout.
-For the recorded background servers created during development, `./stop.ps1`
-checks launcher paths, process identity and an empty project queue before stopping
-only their process trees. `./stop.ps1 -WhatIf` previews the targets. For servers
-started manually in terminals, use Ctrl+C in those terminals.
-
-The local service binds only to loopback. It validates Host/Origin, caps request
-size, and does not write uploaded audio. Saving a project JSON includes audio by
-design. Do not publish a project containing a private recording inadvertently.
-
-## Verification
+이 프로젝트는 기존 ComfyUI/Studio와 별도입니다. 기존 설치, `.venv`,
+`custom_nodes`, 워크플로우, 공유 모델, 설정과 서버를 변경하거나 이용하지 않습니다.
+Python 설치는 프로젝트 `.venv`와 선택형 `.comfy-venv`에만 합니다. 정리는 직접
+만든 파일과 프로세스에만 한정합니다. 더 무거운 실행 전에는 공유 자원을 점검합니다.
 
 ```powershell
 ./.venv/Scripts/python.exe -m unittest discover -s tests -p 'test_*.py' -v
-node --test tests/web/*.test.mjs
-# With this project's two services running:
-./.venv/Scripts/python.exe tools/verify_api.py
+node --test tests/web/*.test.mjs tests/play/*.test.mjs
 ```
 
-Tests cover silence/noise, timing, actual CPU model inference when installed,
-malformed payloads, SVG safety, motion/export consistency and project round trips.
-Node stub tests are not represented as proof of actual Comfy execution; the API
-verification explicitly queues the independent project workflow and checks history.
+분석 전용 회귀 검증은 합성 자료 6종의 전체 5초 결과를 Python과 비교합니다.
+실제 단일 스레드 WASM도 실행하며 모든 모델 입력 청크의 해시를 대조합니다.
+취소·재시작, 원본 버퍼 보존, 정직한 신호 fallback도 검증합니다. 합성 테스트는
+실제 사람·모바일·공개 서비스의 사용성 검증을 대신하지 않습니다.
+자동 테스트 89개와 합성 스트림의 실제 녹음·분석·MP4 생성, 일반 정적 서버 및
+캐시 후 오프라인 재생성을 확인했습니다. 자세한 근거와 남은 검증은
+`VERIFICATION.md`와 [초기 브라우저 기술 검증](docs/BROWSER_PROOF.md)의 각 기록의
+버전과 범위를 확인해 읽어 주세요.
 
-See `VERIFICATION.md` for the recorded end-to-end checks and limitations of this build.
+## 라이선스
 
-## License
-
-Original app and custom pack: MIT. Basic Pitch: Apache-2.0; its original license is
-saved beside the downloaded model. Independent ComfyUI runtime: GPL-3.0, downloaded
-separately and excluded from this repository. See `NOTICE` for source provenance.
+원본 앱·캐릭터·합성 소재와 custom pack은 MIT, Basic Pitch는 Apache-2.0,
+ONNX Runtime Web과 MP4/WebM muxer는 MIT입니다. 별도 선택형 ComfyUI는 GPL-3.0입니다.
+정확한 버전·출처와 보존된 라이선스는 [NOTICE](NOTICE) 및 런타임 manifest에 있습니다.

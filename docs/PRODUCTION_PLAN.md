@@ -1,84 +1,118 @@
-# Product direction and submission readiness
+# BOP! v0.2 — current implementation and submission work
 
-## The public product
+## Implemented product
 
-Make a playful **sound-to-mascot web app** for people who do not edit video.
-The first session should be: choose a character → make a five-second sound →
-watch it move → save a video. SVG import, analysis-engine choices and curve
-controls belong in an advanced creator view. The current Studio UI is a technical
-prototype; it is not yet this simplified public interface.
+BOP! is now the default browser app: choose one of three original characters,
+explicitly record five seconds, preview the motion, then save or share a real
+video. The synthetic demo works without microphone permission. No account,
+Python installation, Comfy server or remote inference endpoint is required for
+this public basic mode.
 
-The BOP! gallery is an actual production test with original vector mascots and
-synthetic performances. No animation was generated inside the source SVGs, and
-gallery videos are the native app exports. It demonstrates timing, silence and
-elastic response. It is not evidence of human microphone usability or semantic
-understanding of sounds.
+The former SVG/audio creator interface is preserved locally at
+`/studio/index.html`. Its advanced analysis still uses the project Python backend
+and can optionally queue the project's isolated Comfy workflow. This local Studio
+is not included in the standalone public static build.
 
-## Hosting and computation
+Current browser implementation:
 
-- The present Basic Pitch ONNX model is about 225 KiB and runs on CPU. A permanent
-  GPU server is not required for the current feature set.
-- A desktop browser proof now runs the actual model with single-thread WASM.
-  The first 43,844 PCM samples (~1.99 seconds) took 71.9ms in one observed run,
-  with aggregate output statistics matching Python within stated tolerances.
-  See [the proof](BROWSER_PROOF.md). The full audio/microphone analysis pipeline
-  and mobile performance are not yet ported or verified.
-- Canvas preview, SVG generation and video recording already happen in the
-  browser. Original audio need not be uploaded merely to create a downloadable
-  video if analysis can move into the browser.
-- Keep any production Comfy workflow meaningful: actual analysis/refinement or
-  artifact creation, not a decorative SDK call. The current app's configured
-  analysis route really queues its own Comfy nodes.
-- Public hosting must not expose the developer's local machine or existing Studio.
-  Decide hosting budget, concurrency limits and retention policy after measuring
-  the simplified public flow. No paid service or public inference endpoint has
-  been deployed.
+- Full audio analysis runs in a Worker using `onnxruntime-web@1.30.0`, one CPU
+  WASM thread and the actual Spotify Basic Pitch model. It includes resampling,
+  overlapping model windows with absolute timing, RMS/noise gating, pitch
+  confidence, energy-gated impacts and silence-held progress.
+- Missing runtime/model assets cause an honestly labeled, real JavaScript signal
+  fallback. An explicit Basic Pitch request fails instead of fabricating an AI result.
+- Preview and export use the same portrait scene renderer: 720×960, 24fps, five
+  seconds. Original sound accompanies the generated video. Supported WebCodecs
+  configurations prefer H.264/AAC MP4, then WebM; MediaRecorder is the realtime
+  fallback. Actual format/support is detected, not assumed. WebM finalization
+  code addresses container duration/seek metadata; actual output QA remains necessary.
+- Microphone acquisition is explicit. Recording cancellation, worker termination,
+  stale-take rejection, media cleanup, permission/error messages, native sharing
+  detection, touch targets and reduced-motion handling are implemented.
+- No user audio is uploaded or cached. Only public static app/model/demo assets
+  enter the optional service-worker cache. A saved/shared video contains its sound;
+  a friend challenge URL contains the character choice only.
 
-## Official Comfy integration
+The model is about 225 KiB; required self-hosted model/runtime/license files total
+14,557,305 bytes. The first visit also loads app/character/demo/export assets.
+An always-on GPU or inference server is unnecessary for this basic flow. A static
+HTTPS host is still needed to distribute the site and allow normal microphone use.
 
-The [competition page](https://comfy.org/open-source-higgsfield) asks for a working
-creative app with a usable interface and example outputs, code/workflows/license/
-local setup, a demo of at most two minutes, and a social post. A deployed try-it
-link is encouraged rather than mandatory. Submission is intentionally deferred
-until the production build is ready.
+## Evidence and limits
 
-The current v0.1 calls the native ComfyUI Server `/prompt` route. Whether that
-legacy route alone satisfies the competition's named Developer Platform is not
-explicitly settled by the published wording. Do not claim verified eligibility.
+The full analysis regression suite passes 21 tests, including six complete
+five-second synthetic fixtures against Python signal and Basic Pitch references.
+Actual Node-hosted single-thread WASM inference is exercised. Every model input
+chunk matches Python byte-for-byte. On these fixtures, rounded time, energy,
+pitch and progress match exactly; maximum confidence difference is 0.000203 and
+maximum onset difference is 0.000011 across CPU/WASM kernels. Impact counts and
+times match. This is full-frame comparison, not the earlier aggregate-only proof.
 
-The proposed submission architecture uses the [official Comfy SDK](https://docs.comfy.org/development/api-development/sdks)
-and [local API v2 proxy](https://docs.comfy.org/development/comfyui-server/api-proxy),
-which officially support self-hosted ComfyUI:
+The [initial desktop browser proof](BROWSER_PROOF.md) separately records actual
+browser inference for one raw model window. It is historical evidence for the
+runtime, not the latest whole-product verification record.
+
+The root integration check is in progress. Do not infer completed real-phone
+Safari testing, human microphone usability, public deployment or universal MP4
+support from the code or synthetic tests. No final contest submission has been made.
+
+## Static delivery
+
+`tools/build_static.py` creates a self-contained static site with relative
+module/asset URLs, pinned same-origin runtimes, licenses and a hashed build
+manifest. It excludes Python, APIs, local Studio, recordings and developer outputs.
+The output directory must be empty; the builder never deletes existing files.
+No runtime CDN or paid endpoint is required. HTTPS, proper module/WASM serving,
+cache behavior and subpath deployment must be verified on the chosen host before
+adding a public try-it URL. Browser storage limits can prevent offline reuse.
+
+The original ComfyUI/Studio remains outside this project and is never modified,
+restarted or used for this app. All optional local services and dependencies stay
+in this checkout. Basic browser inference uses no GPU.
+
+## Official Comfy integration is still pending
+
+The [competition](https://comfy.org/open-source-higgsfield) names the Comfy
+Developer Platform. The existing advanced local route really executes this
+project's Comfy nodes through native `/prompt`, but whether that route alone
+satisfies the named requirement has not been established. The new browser basic
+mode does not call Comfy at all. Do not claim confirmed contest eligibility.
+
+The proposed optional creator/refinement path would use the
+[official SDK](https://docs.comfy.org/development/api-development/sdks) and
+[self-hosted API v2 proxy](https://docs.comfy.org/development/comfyui-server/api-proxy):
 
 ```
-Browser UI → project backend → official Comfy SDK
-           → project API v2 proxy :8795 → isolated ComfyUI :8794
-           → Basic Pitch → editable motion → browser export
+Advanced creator → project backend → official Comfy SDK
+                 → project proxy :8795 → isolated ComfyUI :8794
+                 → actual project-owned artifact → creator UI
 ```
 
-Research pins: `comfy-sdk==0.5.0`, `comfy-api-proxy==0.1.6`.
-They are **not installed or integrated in v0.1**. Never use their default ComfyUI
-ports or fall through to Cloud when configuration is absent. The proxy needs a
-downloadable analysis JSON output; the current STRING history output alone is
-not exposed through SDK `get_outputs()`. Save only project-owned analysis artifacts
-under a bounded retention policy. Avoid persistence of input audio/workflow samples
-without an explicit product decision. Official SDK use does not itself guarantee
-contest eligibility.
+Research pins are `comfy-sdk==0.5.0` and `comfy-api-proxy==0.1.6`; they are not
+installed or integrated. Configuration must remain explicit and project-local,
+with no default external Cloud endpoint or discovery of the user's existing
+servers. The current STRING history output alone is not exposed as a downloadable
+SDK v2 artifact: an actual file output node, output retrieval and bounded artifact
+retention are required. Persisting workflows can also persist input samples, so
+input retention must be designed before enabling proxy persistence.
 
-## Gates before final submission
+The creator path needs a useful creative function beyond what the browser already
+does. A decorative SDK badge, unused workflow export or redundant call is not a
+sound integration plan. Defining that function, implementing it and checking the
+competition interpretation remain submission work; official SDK use alone does
+not guarantee eligibility.
 
-1. A playful first-use UI; microphone errors, stop/retry and mobile use tested with
-   consenting people. Starter characters require no SVG knowledge.
-2. Full browser analysis port and mobile performance measured; a chosen, bounded
-   deployment architecture. Preserve the user's existing Studio isolation.
-3. Actual official SDK workflow → output bytes → UI integration proven end to end.
-4. Production exports: predictable framing, intentional ending/loop behavior,
-   seekable video metadata, audio/video alignment, supported sharing formats.
-5. Human voice/noise tests and simple usability trials. Existing synthetic inputs
-   are repeatable test fixtures, not a substitute for these trials.
-6. Final demonstration, public links, personal details and required consents checked
-   before the single competition submission. No application has been submitted.
+## Before a final submission
 
-Known output limitation: browser MediaRecorder WebM files can initially report
-infinite duration and lack usable seek ranges. The BOP! videos played successfully,
-but their container metadata needs improvement before calling exports production-ready.
+1. Complete whole-flow desktop QA: real playable output, audio/video alignment,
+   five-second ending, metadata/seek, fallback encoders, sharing and cancellation.
+2. Test consenting human voices, background noise, silence and microphone-denied
+   recovery. Measure a real iPhone/Safari and representative Android browsers,
+   including loading, memory/battery, backgrounding and download behavior.
+3. Verify a public HTTPS static build, repository subpath, cold/warm/offline cache
+   behavior and the absence of recorded-audio network requests. Add its confirmed URL.
+4. Decide and deliver the meaningful official Comfy SDK creator/artifact path,
+   with actual workflow execution and returned output bytes; resolve eligibility.
+5. Prepare the final demonstration, example outputs, source/workflows/licenses,
+   required personal details and any consents before submitting. Existing synthetic
+   gallery results are clearly labeled and do not stand in for human usability tests.

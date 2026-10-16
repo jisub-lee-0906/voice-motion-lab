@@ -1,11 +1,14 @@
-Voice Motion Lab
+BOP! / Voice Motion Lab
 Copyright 2026 Voice Motion Lab contributors
 
-The optional Basic Pitch model is from Spotify AB, Apache License 2.0.
+The Basic Pitch model used by browser mode and the optional Python analysis
+is from Spotify AB, Apache License 2.0.
 https://github.com/spotify/basic-pitch
 Pinned revision: fa5997af0a8210982619003269994a1be25eddf3
-The original model license is saved with the model by tools/setup_model.py.
-Model weights are downloaded into this project's ignored .runtime/models folder.
+The original model license is saved with the model by tools/setup_model.py and
+preserved in the browser runtime by tools/setup_browser_proof.py. Model weights
+live in ignored project runtime directories and are included with their license
+when building the standalone static site.
 This application does not redistribute the user's models, workflows, or code.
 
 ComfyUI is a separate optional runtime, licensed under GPL-3.0.
@@ -13,7 +16,26 @@ https://github.com/Comfy-Org/ComfyUI
 Its source and dependencies are installed separately under ignored project-owned
 runtime/environment directories, never in the user's existing installation.
 
-The optional browser inference proof downloads Microsoft ONNX Runtime Web 1.30.0,
+Browser analysis uses Microsoft ONNX Runtime Web 1.30.0,
 licensed under MIT, from the official npm package. Its original license and the
 Basic Pitch license are preserved with ignored runtime assets. No runtime binary
-is committed. Exact source URLs, integrity and hashes are in the proof manifest.
+is committed. Exact source URLs, npm SHA-512 integrity and per-file SHA-256 hashes
+are in web/browser-proof/manifest.json. The static site bundles these local assets.
+https://github.com/microsoft/onnxruntime
+https://registry.npmjs.org/onnxruntime-web/-/onnxruntime-web-1.30.0.tgz
+
+Optional browser WebCodecs container muxers:
+
+- mp4-muxer 5.2.2, MIT, Vanilagy / upstream contributors.
+  https://github.com/Vanilagy/mp4-muxer
+  https://registry.npmjs.org/mp4-muxer/-/mp4-muxer-5.2.2.tgz
+- webm-muxer 5.1.4, MIT, Vanilagy / upstream contributors.
+  https://github.com/Vanilagy/webm-muxer
+  https://registry.npmjs.org/webm-muxer/-/webm-muxer-5.1.4.tgz
+
+tools/setup_export_runtime.py verifies pinned npm SHA-512 integrity before
+extracting the unmodified modules, original LICENSE files and READMEs under
+ignored web/play/vendor/. Exact integrity, bytes and SHA-256 hashes are in
+web/play/vendor/export-runtime.json. They are included in a static build with
+their licenses. These upstream packages are deprecated in favor of Mediabunny;
+this app uses the pinned container muxers only and does not bundle Mediabunny.

@@ -1,4 +1,14 @@
-# Browser model inference proof
+# Initial browser model inference proof (v0.1 historical record)
+
+The v0.2 app now implements the complete five-second browser pipeline. The
+analysis, microphone, preview and real video export are in `web/play/`; no
+inference API is needed. The actual one-thread WASM tests compare all 301 frames
+of six synthetic five-second cases against Python, with identical model-input
+chunk hashes. Timing, energy, pitch and progress match to six decimals; the
+largest confidence difference is 0.000203. See `VERIFICATION.md` for current
+full-flow browser evidence and remaining physical-device checks.
+
+The measurements below preserve the earlier one-window compatibility experiment.
 
 The actual Spotify Basic Pitch ONNX model ran in a browser Web Worker using
 `onnxruntime-web@1.30.0`, the CPU WASM provider and one thread. No model inference
@@ -16,8 +26,8 @@ Observed in one desktop Chromium run:
 
 This is a compatibility proof, not a mobile speed claim or a complete port.
 Output arrays were compared through aggregate statistics, not element by element.
-The full chunking, energy gate, pitch tracking, impact detection, microphone input,
-preview and export flow still needs browser implementation and testing.
+At the time of this experiment, the full chunking, energy gate, pitch tracking,
+impact detection, microphone, preview and export flow had not yet been ported.
 
 ## Reproduce
 

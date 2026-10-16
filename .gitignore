@@ -16,3 +16,5 @@ node_modules/
 *.log
 tests/artifacts/
 web/browser-proof/vendor/
+web/play/vendor/
+_site/
