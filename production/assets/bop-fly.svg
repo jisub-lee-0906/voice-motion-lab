@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="160" viewBox="0 0 240 160">
+  <title>BOP! — Lift off</title>
+  <desc>Original BOP! gummy mascot, flying mood. Voice Motion Lab production test asset. MIT license.</desc>
+  <defs>
+    <linearGradient id="lime-fly" x1="0" y1="0" x2="0.7" y2="1"><stop offset="0" stop-color="#e9ff93"/><stop offset="0.52" stop-color="#c5f744"/><stop offset="1" stop-color="#7ce09d"/></linearGradient>
+    <linearGradient id="wing-fly" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#bba7ff"/><stop offset="1" stop-color="#8367e7"/></linearGradient>
+  </defs>
+  <g fill="none" stroke="#141b2b" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M37 64H16M31 80H8M39 97H20" stroke="#bba7ff" stroke-width="6"/>
+    <path d="M180 83C190 63 213 57 230 61L216 76 227 81 206 91 216 99C199 105 185 99 180 91Z" fill="url(#wing-fly)"/>
+    <path d="M69 104 51 121C42 129 39 112 47 98L64 77" fill="#bba7ff"/>
+    <path d="M84 34 90 15 107 31M143 31 160 15 165 42" fill="#c5f744"/>
+    <path d="M59 70C57 43 78 30 112 30H141C169 30 186 48 186 76 186 105 167 122 139 122H99C74 122 57 103 59 70Z" fill="url(#lime-fly)"/>
+    <path d="M74 58C80 44 94 43 105 43" stroke="#f5ffdc" stroke-width="7"/>
+    <path d="M106 64 112 58M148 60 155 65" stroke-width="5"/>
+    <path d="M104 73C112 65 122 65 129 73M145 73C153 65 163 65 170 73" stroke-width="5"/>
+    <path d="M131 81C134 90 144 92 152 83" fill="#fff5dc"/>
+    <path d="M94 86 103 88M163 87 172 84" stroke="#ff7b67" stroke-width="7"/>
+    <path d="M176 109 192 122 187 127 172 119" fill="#ff7b67"/>
+    <path d="m198 32 3-8 4 8 8 4-8 3-4 8-3-8-8-3Z" fill="#fff2a8" stroke-width="3"/>
+    <rect x="65" y="106" width="123" height="44" rx="17" fill="#141b2b" stroke="#141b2b" transform="rotate(-3 126 128)"/>
+    <rect x="60" y="100" width="123" height="44" rx="17" fill="#fff5dc" transform="rotate(-3 121 122)"/>
+  </g>
+  <g transform="translate(74 109) rotate(-3 48 17) scale(.67)" fill="#141b2b" fill-rule="evenodd">
+    <path d="M0 0H16C27 0 32 5 32 13 32 18 29 22 25 24 31 26 34 30 34 36 34 45 28 50 17 50H0ZM11 10V20H15C19 20 21 18 21 15 21 12 19 10 15 10ZM11 30V40H17C21 40 23 38 23 35 23 32 21 30 17 30Z"/>
+    <path d="M61-1C76-1 84 8 84 25 84 42 76 51 61 51 46 51 38 42 38 25 38 8 46-1 61-1ZM61 10C54 10 50 15 50 25 50 35 54 40 61 40 68 40 72 35 72 25 72 15 68 10 61 10Z"/>
+    <path d="M90 0H109C122 0 128 7 128 18 128 30 120 36 109 36H102V50H90ZM102 11V25H108C114 25 116 22 116 18 116 13 114 11 108 11Z"/>
+    <path d="M135 0H147L145 32H137ZM136 39H146V50H136Z"/>
+  </g>
+</svg>

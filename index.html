@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f7f6ee">
+  <meta name="description" content="캐릭터를 고르고 5초 동안 소리 내보세요. 내 목소리가 움직이는 밈 영상이 됩니다. 로그인 없이, 브라우저 안에서.">
+  <title>BOP! — 내 목소리로 만드는 5초 밈</title>
+  <link rel="stylesheet" href="./play/style.css">
+  <script type="module" src="./play/app.mjs"></script>
+</head>
+<body>
+  <header class="header">
+    <a class="wordmark" href="./" aria-label="BOP! 홈">BOP<span>!</span><i aria-hidden="true">✦</i></a>
+    <span class="header-note"><i aria-hidden="true"></i> 로그인 없이, 그냥 놀자.</span>
+    <a class="studio-link" href="https://github.com/jisub-lee-0906/voice-motion-lab#advanced-local-studio">제작 도구 <span aria-hidden="true">↗</span></a>
+  </header>
+  <main class="playground">
+    <section class="intro" aria-labelledby="page-title">
+      <span class="eyebrow">YOUR VOICE. THEIR CHAOS.</span>
+      <h1 id="page-title">입으로 만든<br><span class="highlight">이상한 5초.</span><span class="title-star" aria-hidden="true">✳</span></h1>
+      <p class="lead">“아아아↗” 해도, “둠칫!” 해도 좋아요.<br>내 소리에 맞춰 움직이는 <strong>나만의 밈 영상.</strong></p>
+    </section>
+    <section class="characters" aria-labelledby="characters-title">
+      <div class="section-heading"><h2 id="characters-title"><span class="step">1</span> 오늘의 분신은?</h2><span class="small-note">나중에 바꿔도 돼요</span></div>
+      <div class="character-grid" role="group" aria-label="캐릭터 선택">
+        <button class="character active" type="button" data-character="bounce" aria-pressed="true"><span class="selected-tick" aria-hidden="true">✓</span><img src="./production/assets/bop-bounce.svg" alt="" width="240" height="160"><strong>말랑 바운스</strong><span>통! 통! 통!</span></button>
+        <button class="character" type="button" data-character="fly" aria-pressed="false"><span class="selected-tick" aria-hidden="true">✓</span><img src="./production/assets/bop-fly.svg" alt="" width="240" height="160"><strong>삐슝 비행</strong><span>위이이이잉↗</span></button>
+        <button class="character" type="button" data-character="orbit" aria-pressed="false"><span class="selected-tick" aria-hidden="true">✓</span><img src="./production/assets/bop-orbit.svg" alt="" width="240" height="160"><strong>우주 둠칫</strong><span>둠칫 두둠칫</span></button>
+      </div>
+    </section>
+    <section class="preview-panel" aria-label="내 밈 영상">
+      <div class="preview-heading"><span><i aria-hidden="true"></i> THE BOP! STAGE</span><span>9:12 · 5 SEC</span></div>
+      <div class="stage-shell" id="stage-shell">
+        <canvas id="stage" width="720" height="960" aria-label="선택한 캐릭터의 목소리 모션 미리보기"></canvas>
+        <video id="result-video" loop muted playsinline controls preload="metadata" aria-label="완성된 5초 밈 영상" hidden></video>
+        <div class="stage-top-tag" id="stage-tag">목소리 주인 구함</div>
+        <div class="listening-overlay" id="listening-overlay" hidden><span id="listening-label">듣고 있어요</span><strong id="countdown">5</strong><div class="level-meter" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><small>마음껏 소리 내보세요!</small></div>
+        <div class="stage-bottom" id="stage-bottom"><span class="sound-tag">● SOUND ON, PERSONALITY ON.</span><span class="stage-instruction">아래 버튼을 누르면 네 차례.</span></div>
+      </div>
+      <div class="preview-foot"><span id="preview-caption">말랑 바운스 · 아직은 얌전함</span><button id="sound-toggle" class="sound-button" type="button" hidden aria-pressed="false">소리 켜기 <span aria-hidden="true">♪</span></button></div>
+    </section>
+    <section class="record-section" aria-labelledby="record-title">
+      <div class="section-heading"><h2 id="record-title"><span class="step">2</span> 5초만 소리 내봐요</h2><span class="small-note" id="record-hint">허밍, 비트박스, 아무 소리!</span></div>
+      <button id="record" class="record-button" type="button"><span class="record-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="13" rx="4"/><path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v3M8 22h8"/></svg></span><span id="record-label">5초 녹음하고 만들기</span><span class="record-arrow" aria-hidden="true">↗</span></button>
+      <button id="cancel-record" class="cancel-button" type="button" hidden>취소하기</button>
+      <div class="status-box" id="status-box"><span class="status-mark" id="status-mark" aria-hidden="true">✳</span><div><p id="status" role="status" aria-live="polite">캐릭터를 고르고 녹음하면, 바로 움직여요.</p><div class="export-progress" id="export-progress" role="progressbar" aria-label="영상 준비" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" hidden><span></span></div></div></div>
+      <p class="privacy"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="2"/><path d="M5 7V5a3 3 0 0 1 6 0v2"/></svg> 녹음은 내 기기 안에서만. 서버로 보내지 않아요.</p>
+      <div class="demo-row"><span>마이크 켜기 전에 맛보기</span><button id="demo" class="text-button" type="button">합성음 데모로 놀기 <span aria-hidden="true">↗</span></button></div>
+    </section>
+    <section class="result-actions" id="result-actions" aria-label="완성한 밈 저장과 공유" hidden>
+      <div class="result-heading"><span class="step">3</span><h2>이걸 혼자 보긴 아깝지.</h2><span aria-hidden="true">↘</span></div>
+      <div class="result-buttons"><button id="save" class="save-button" type="button">영상 저장 <span aria-hidden="true">↓</span></button><button id="share" class="share-button" type="button">친구에게 보내기 <span aria-hidden="true">↗</span></button></div>
+      <button id="record-again" class="text-button again-button" type="button">내 목소리로 한 번 더 녹음하기 ↻</button>
+      <button id="remix-link" class="text-button remix-button" type="button">친구도 이 캐릭터로 도전하기 · 링크 복사</button>
+      <p id="format-note" class="format-note"></p>
+    </section>
+  </main>
+  <footer class="footer"><span class="footer-brand">BOP! <small>BY VOICE MOTION LAB</small></span><details><summary>이 작은 소동에 대해</summary><p>발성의 시간·음높이·타격에 맞춰 움직여요. 말의 의미를 해석하지 않아요. 분석과 영상 제작은 이 브라우저 안에서 진행됩니다. 첫 실행에는 분석 파일을 내려받으며, 이후에는 캐시된 파일을 사용할 수 있어요.</p><p id="engine-info">브라우저 분석 준비 중</p><p>합성 데모는 실제 사람의 목소리가 아닙니다. 녹음 시작 전에는 마이크를 켜지 않아요. 영상만 저장되며, 도전 링크에는 목소리가 포함되지 않습니다.</p><a href="https://github.com/jisub-lee-0906/voice-motion-lab#advanced-local-studio">SVG와 모션을 더 세밀하게 편집하기 ↗</a></details></footer>
+  <noscript><p class="noscript">BOP!은 브라우저에서 작동해요. JavaScript를 켜고 다시 열어주세요.</p></noscript>
+</body>
+</html>
