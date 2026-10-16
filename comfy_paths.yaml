@@ -1,0 +1,4 @@
+# Read only by the independent project Comfy runtime. No shared model folders.
+voice_motion_lab:
+  base_path: .
+  custom_nodes: custom_nodes

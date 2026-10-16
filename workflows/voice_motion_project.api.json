@@ -1,0 +1,32 @@
+{
+  "voice_motion_analysis": {
+    "class_type": "VoiceMotionAnalyze",
+    "inputs": {
+      "samples_json": "[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]",
+      "sample_rate": 8000,
+      "engine": "signal",
+      "sensitivity": 1,
+      "smoothing": 0.35
+    },
+    "_meta": {
+      "title": "Voice Motion · Synthetic silence (replace with voice)"
+    }
+  },
+  "voice_motion_project": {
+    "class_type": "VoiceMotionProject",
+    "inputs": {
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><circle cx=\"50\" cy=\"50\" r=\"30\" fill=\"#8ce8cf\"/></svg>",
+      "analysis_json": [
+        "voice_motion_analysis",
+        0
+      ],
+      "settings_json": "{\"preset\":\"fly\",\"intensity\":1,\"smoothing\":0.35,\"background\":\"#10151f\",\"transparent\":false}",
+      "samples_json": "[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]",
+      "sample_rate": 8000,
+      "asset_name": "example-circle.svg"
+    },
+    "_meta": {
+      "title": "Editable project JSON (no animation rendering)"
+    }
+  }
+}

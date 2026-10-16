@@ -1,0 +1,154 @@
+{
+  "format": "voice-motion-production-gallery",
+  "version": 1,
+  "title": "BOP! / Sound in. Motion out.",
+  "disclosure": "Original BOP! vector identity and synthetic humming/plop audio. Not a human voice recording.",
+  "license": "MIT",
+  "native_copies": "All linked assets are copied byte-for-byte; no rerendering or retouching.",
+  "test_configuration": {
+    "flow": [
+      "Voice Motion Lab audio import",
+      "isolated project ComfyUI API",
+      "VoiceMotionAnalyze",
+      "Basic Pitch ONNX / CPUExecutionProvider",
+      "shared browser motion renderer",
+      "native app exports"
+    ],
+    "engine_verified_from_project": true,
+    "transport_note": "Project JSON proves the analysis engine; the ComfyUI transport is the documented test configuration, not inferred from JSON."
+  },
+  "takes": [
+    {
+      "preset": "bounce",
+      "title": "Big bounce",
+      "duration": 7.2,
+      "engine": "basic_pitch",
+      "sample_rate": 22050,
+      "expected_impacts": 7,
+      "actual_impacts": 7,
+      "synthetic_audio": true,
+      "original_identity": true,
+      "cue": "0.35s · 1.00s · 1.72s / 리듬에 맞춘 7번의 어택",
+      "files": {
+        "webm": {
+          "path": "takes/bounce.webm",
+          "bytes": 1056624,
+          "sha256": "2fe832fb2d2b29abf341207bee50ffdeb1d7bbcae7f3630b15d3aafb3309ea9d"
+        },
+        "svg": {
+          "path": "takes/bounce.svg",
+          "bytes": 29558,
+          "sha256": "819f8dde82fb70bfacc90211c39a5fce16ffbe4174240b001f7266adf1724193"
+        },
+        "json": {
+          "path": "takes/bounce.json",
+          "bytes": 1940891,
+          "sha256": "bf1a994b02731a5a8c8f989a991d6e3e1e235819ef5517b1dc1055240fcbd601"
+        },
+        "source_svg": {
+          "path": "assets/bop-bounce.svg",
+          "bytes": 2482,
+          "sha256": "7e0a6bfce951b90a81578704905fae2fc0d935ae8e4148923ba8d35c578bb9e1"
+        },
+        "source_audio": {
+          "path": "audio/bop-bounce.wav",
+          "bytes": 317564,
+          "sha256": "c59ffc6c6469e57ece744166711bc0fb9a47c8c7306e99592b206712d83f8f51"
+        },
+        "poster": {
+          "path": "takes/bounce-poster.png",
+          "bytes": 29810,
+          "sha256": "df1262b4698d00c8904b3865359ba06b2b364660f5ccbed8e638b008d9241896"
+        }
+      }
+    },
+    {
+      "preset": "fly",
+      "title": "Lift off",
+      "duration": 7.2,
+      "engine": "basic_pitch",
+      "sample_rate": 22050,
+      "expected_impacts": 3,
+      "actual_impacts": 3,
+      "synthetic_audio": true,
+      "original_identity": true,
+      "cue": "2.30–3.15s / 무음에서는 경로 진행이 멈춥니다",
+      "files": {
+        "webm": {
+          "path": "takes/fly.webm",
+          "bytes": 995501,
+          "sha256": "64fcb815ed85b9779ac534a56e900ca41a28cbe0284cc218e23a04154b43d665"
+        },
+        "svg": {
+          "path": "takes/fly.svg",
+          "bytes": 29460,
+          "sha256": "3e5a8a245ad2dbf6887cb008a53c5943d298d495aec2ae8d99db97de66b3a7c5"
+        },
+        "json": {
+          "path": "takes/fly.json",
+          "bytes": 2190264,
+          "sha256": "1bc02b9991d11b2a1384ed37639ed7ac42edf730d42b4c4626407778d6f491c8"
+        },
+        "source_svg": {
+          "path": "assets/bop-fly.svg",
+          "bytes": 2606,
+          "sha256": "7a646edcd3dc7739de6715f55c06c61234cc00f2da064ace17f50a37f829d1c9"
+        },
+        "source_audio": {
+          "path": "audio/bop-freeze-flight.wav",
+          "bytes": 317564,
+          "sha256": "2854a8061626d7ee48e7c0b58f388096a4e0f06c8392fdf6ec3f18d0dcb0ecc0"
+        },
+        "poster": {
+          "path": "takes/fly-poster.png",
+          "bytes": 25644,
+          "sha256": "ed2f40cd1f004d3b3827ef57843d8806bcc95f51af125c0d1dde2d3a432a6f81"
+        }
+      }
+    },
+    {
+      "preset": "orbit",
+      "title": "Cosmic groove",
+      "duration": 7.6,
+      "engine": "basic_pitch",
+      "sample_rate": 22050,
+      "expected_impacts": 5,
+      "actual_impacts": 5,
+      "synthetic_audio": true,
+      "original_identity": true,
+      "cue": "4개의 허밍 곡선 + 엔딩 액센트 / 5번의 어택",
+      "files": {
+        "webm": {
+          "path": "takes/orbit.webm",
+          "bytes": 1323835,
+          "sha256": "4d7f1986ab6177896414d4fd73f23a8a3edba4af80b65c7dc0d9ba76345d76a9"
+        },
+        "svg": {
+          "path": "takes/orbit.svg",
+          "bytes": 31618,
+          "sha256": "87c1381becba755ca65bc36057e0a527128785b65eac0518a5edc3e53de9f36e"
+        },
+        "json": {
+          "path": "takes/orbit.json",
+          "bytes": 2611598,
+          "sha256": "08b33e60f1f255acba52b6df59183954ea5108bacefc59103c132fbfaadccea7"
+        },
+        "source_svg": {
+          "path": "assets/bop-orbit.svg",
+          "bytes": 2872,
+          "sha256": "35a4c63a56562b9ce2adad9dbaa24002b3e4f732c3cc21af0e2d9468992c8030"
+        },
+        "source_audio": {
+          "path": "audio/bop-orbit.wav",
+          "bytes": 335204,
+          "sha256": "8573a096d20e73c23063644ca83e10a81924b528d5f483e46bb6c709513dddfb"
+        },
+        "poster": {
+          "path": "takes/orbit-poster.png",
+          "bytes": 30008,
+          "sha256": "1785344bcd805b7aef8e20efa6fdca69c3829e54c9d9c02a764e2e8a41e555ae"
+        }
+      }
+    }
+  ]
+}

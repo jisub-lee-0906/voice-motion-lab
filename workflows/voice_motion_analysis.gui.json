@@ -1,0 +1,96 @@
+{
+  "last_node_id": 1,
+  "last_link_id": 0,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "VoiceMotionAnalyze",
+      "pos": [
+        100,
+        100
+      ],
+      "size": [
+        470,
+        350
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples_json",
+          "type": "STRING",
+          "widget": {
+            "name": "samples_json"
+          },
+          "link": null
+        },
+        {
+          "name": "sample_rate",
+          "type": "INT",
+          "widget": {
+            "name": "sample_rate"
+          },
+          "link": null
+        },
+        {
+          "name": "engine",
+          "type": "COMBO",
+          "widget": {
+            "name": "engine"
+          },
+          "link": null
+        },
+        {
+          "name": "sensitivity",
+          "type": "FLOAT",
+          "widget": {
+            "name": "sensitivity"
+          },
+          "link": null
+        },
+        {
+          "name": "smoothing",
+          "type": "FLOAT",
+          "widget": {
+            "name": "smoothing"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "analysis_json",
+          "type": "STRING",
+          "links": null,
+          "slot_index": 0
+        }
+      ],
+      "title": "Synthetic silence — replace samples with your voice",
+      "properties": {
+        "Node name for S&R": "VoiceMotionAnalyze"
+      },
+      "widgets_values": [
+        "[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]",
+        8000,
+        "signal",
+        1,
+        0.35
+      ]
+    }
+  ],
+  "links": [],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 1,
+      "offset": [
+        0,
+        0
+      ]
+    },
+    "voice_motion_note": "Synthetic 0.01 s silence. CPU signal engine, no open-model quality claim."
+  },
+  "version": 0.4
+}

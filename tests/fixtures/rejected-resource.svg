@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <title>Rejected fixture: CSS-escaped external paint resource</title>
+  <rect width="200" height="200" fill="u&#92;72l(https://example.invalid/forbidden-resource.svg#paint)"/>
+</svg>

@@ -1,0 +1,6 @@
+[project]
+name = "voice-motion-lab-comfy"
+version = "0.1.0"
+description = "Project-local JSON analysis and editable project nodes for Voice Motion Lab"
+license = "MIT"
+requires-python = ">=3.10"

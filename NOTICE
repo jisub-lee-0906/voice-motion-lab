@@ -1,0 +1,14 @@
+Voice Motion Lab
+Copyright 2026 Voice Motion Lab contributors
+
+The optional Basic Pitch model is from Spotify AB, Apache License 2.0.
+https://github.com/spotify/basic-pitch
+Pinned revision: fa5997af0a8210982619003269994a1be25eddf3
+The original model license is saved with the model by tools/setup_model.py.
+Model weights are downloaded into this project's ignored .runtime/models folder.
+This application does not redistribute the user's models, workflows, or code.
+
+ComfyUI is a separate optional runtime, licensed under GPL-3.0.
+https://github.com/Comfy-Org/ComfyUI
+Its source and dependencies are installed separately under ignored project-owned
+runtime/environment directories, never in the user's existing installation.
