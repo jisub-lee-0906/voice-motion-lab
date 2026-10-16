@@ -175,6 +175,16 @@ class SDKAdapterTests(unittest.IsolatedAsyncioTestCase):
             with self.subTest(theme=theme, seed=seed), self.assertRaises(ValueError):
                 mv_sdk.build_mv_graph(self.job_id, transcript, theme, seed)
 
+    def test_canonical_stereo_float_wav_can_exceed_32_mib_but_not_64(self):
+        for size, accepted in ((33*1024*1024, True), (64*1024*1024, True), (64*1024*1024+1, False)):
+            with self.audio.open('wb') as source:
+                source.truncate(size)
+            if accepted:
+                self.assertEqual(mv_sdk.validate_job_paths(self.audio, self.output)[0], self.audio)
+            else:
+                with self.assertRaisesRegex(ValueError, '64 MiB'):
+                    mv_sdk.validate_job_paths(self.audio, self.output)
+
     @unittest.skipUnless(importlib.util.find_spec("comfy_sdk"), "Pinned official SDK not installed")
     async def test_real_sdk_wire_omits_metadata_incompatible_with_local_proxy(self):
         import httpx

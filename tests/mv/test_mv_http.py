@@ -43,9 +43,9 @@ class HTTPTests(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         cls.server.shutdown(); cls.server.server_close(); cls.thread.join(timeout=3)
-    def request(self, path='/', method='GET', headers=None):
+    def request(self, path='/', method='GET', headers=None, body=None):
         conn=http.client.HTTPConnection('127.0.0.1',self.port,timeout=10)
-        conn.request(method,path,headers=headers or {}); response=conn.getresponse(); data=response.read()
+        conn.request(method,path,body=body,headers=headers or {}); response=conn.getresponse(); data=response.read()
         value=response.status,dict(response.getheaders()),data; conn.close(); return value
     def test_local_static_and_video_style_range(self):
         status,headers,data=self.request('/app.mjs',headers={'Range':'bytes=0-31'})
@@ -63,6 +63,37 @@ class HTTPTests(unittest.TestCase):
         ident='a'*32
         self.assertEqual(self.request('/api/mv/jobs/'+ident)[0],404)
         self.assertEqual(self.request('/api/mv/jobs/'+ident+'/artifacts/video.mp4')[0],404)
+
+    def test_upload_endpoint_parses_original_bytes_without_model_execution(self):
+        # Boundary-only test: create is mocked, never represented as inference.
+        boundary='mv-http-upload'
+        audio=b'original\x00\x80\xffaudio'
+        body=(b'--'+boundary.encode()+b'\r\nContent-Disposition: form-data; name="metadata"\r\n\r\n{"title":"Upload","theme":"bloom"}\r\n'
+              b'--'+boundary.encode()+b'\r\nContent-Disposition: form-data; name="audio"; filename="../../ignored.wav"\r\nContent-Type: audio/wav\r\n\r\n'+audio+b'\r\n--'+boundary.encode()+b'--\r\n')
+        with patch.object(app,'model_status',return_value={'available':True}), patch.object(app,'comfy_ready',return_value={'available':True}), patch.object(app,'available_ram_gb',return_value=8), patch.object(self.server.RequestHandlerClass.manager,'create',return_value={'id':'e'*32,'status':'queued'}) as create:
+            status,_,data=self.request('/api/mv/uploads','POST',{'Content-Type':'multipart/form-data; boundary='+boundary},body)
+            self.assertEqual(status,202)
+            self.assertEqual(json.loads(data),{'id':'e'*32,'status':'queued'})
+            self.assertEqual(create.call_args.args[0]['raw_audio'],audio)
+            self.assertNotIn('filename',create.call_args.args[0])
+            self.assertEqual(self.request('/api/mv/uploads','POST',{'Content-Type':'application/json'},b'{}')[0],415)
+            self.assertEqual(self.request('/api/mv/uploads','POST',{'Content-Type':'multipart/form-data; boundary=x'},b'broken')[0],400)
+            # Parse failure returned the admission; a retry can acquire it exactly once.
+            admission=self.server.RequestHandlerClass.manager.reserve_upload()
+            admission.release(); admission.release()
+
+    def test_busy_upload_is_rejected_before_reading_or_parsing_body(self):
+        manager=self.server.RequestHandlerClass.manager
+        with patch.object(app,'model_status',return_value={'available':True}), patch.object(app,'comfy_ready',return_value={'available':True}), patch.object(app,'available_ram_gb',return_value=8), patch.object(app,'parse_upload') as parse:
+            admission=manager.reserve_upload()
+            try:
+                # Deliberately send no promised body: a read-first implementation
+                # would wait 30 seconds rather than immediately returning 429.
+                status,_,_=self.request('/api/mv/uploads','POST',{'Content-Type':'multipart/form-data; boundary=x','Content-Length':'1000'})
+                self.assertEqual(status,429)
+                parse.assert_not_called()
+            finally:
+                admission.release()
 
     def test_all_named_artifacts_and_ranges_include_numeric_mp4_extension(self):
         ident = 'd'*32

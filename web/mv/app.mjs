@@ -1,4 +1,4 @@
-import {MAX_SECONDS, SAMPLE_RATE, THEMES, JOB_ID, formatTime, validateDuration, downmix, validateSamples, artifactUrl, fileTitle, validateJob, completedElapsedSeconds, healthMessage} from './helpers.mjs';
+import {MAX_SECONDS, THEMES, JOB_ID, formatTime, validateAudioFile, inspectDecodedAudio, createUploadBody, artifactUrl, fileTitle, validateJob, completedElapsedSeconds, healthMessage} from './helpers.mjs';
 
 const $ = id => document.getElementById(id);
 const ui = Object.fromEntries(['health-badge','create-form','audio-file','dropzone','file-name','file-detail','demo-button','source-note','source-audio','mv-title','lyrics','create-button','empty-stage','result-video','job-panel','job-status','job-elapsed','job-progress','job-message','error-panel','error-message','health-retry','result-panel','result-title','result-meta','download-video','download-project','view-storyboard','engine-detail','result-warnings','storyboard-image','concept-strip','screen-label'].map(id => [id, $(id)]));
@@ -92,9 +92,9 @@ function selectFile(file, isDemo = false) {
   ui['file-detail'].textContent = '또는 눌러서 파일 선택 · 최대 60초';
   ui['create-button'].disabled = true;
   if (!file) return;
-  const fileLimit = Math.min(Number(health?.limits?.max_bytes) || 24 * 1024 * 1024, 40 * 1024 * 1024);
-  if (!file.size || file.size > fileLimit) {
-    showError(`비어 있지 않은 ${Math.floor(fileLimit / (1024 * 1024))}MB 이하 음악을 선택해 주세요. 15–45초 구간을 권장합니다.`);
+  try { validateAudioFile(file, health?.limits?.max_bytes); }
+  catch (error) {
+    showError(errorMessage(error));
     return;
   }
   if (file.type && !file.type.startsWith('audio/') && !/\.(wav|mp3|m4a|ogg|flac|aac|opus|aiff?)$/i.test(file.name)) {
@@ -118,29 +118,13 @@ function selectFile(file, isDemo = false) {
 
 async function decodeAudio(file) {
   const AudioContextClass = globalThis.AudioContext || globalThis.webkitAudioContext;
-  const OfflineContextClass = globalThis.OfflineAudioContext || globalThis.webkitOfflineAudioContext;
-  if (!AudioContextClass || !OfflineContextClass) throw new Error('이 브라우저는 음악 디코딩을 지원하지 않아요. 최신 Chrome, Edge 또는 Safari를 사용해 주세요.');
+  if (!AudioContextClass) throw new Error('이 브라우저는 음악 디코딩을 지원하지 않아요. 최신 Chrome, Edge 또는 Safari를 사용해 주세요.');
   const context = new AudioContextClass();
   try {
     let decoded;
     try { decoded = await context.decodeAudioData(await file.arrayBuffer()); }
     catch { throw new Error('이 음악 형식을 읽을 수 없어요. WAV나 MP3로 변환해서 다시 선택해 주세요.'); }
-    validateDuration(decoded.duration, Math.min(MAX_SECONDS, Number(health?.limits?.max_seconds) || MAX_SECONDS));
-    const mono = downmix(Array.from({length:decoded.numberOfChannels}, (_, channel) => decoded.getChannelData(channel)));
-    const sampleCount = Math.min(MAX_SECONDS * SAMPLE_RATE, Math.round(decoded.duration * SAMPLE_RATE));
-    const renderer = new OfflineContextClass(1, sampleCount, SAMPLE_RATE);
-    const monoBuffer = renderer.createBuffer(1, mono.length, decoded.sampleRate);
-    monoBuffer.copyToChannel(mono, 0);
-    const source = renderer.createBufferSource();
-    source.buffer = monoBuffer;
-    source.connect(renderer.destination);
-    source.start();
-    const rendered = await renderer.startRendering();
-    const samples = new Float32Array(rendered.getChannelData(0));
-    // Resampling filters may ring slightly beyond full scale; retain finite bounded PCM.
-    for (let index = 0; index < samples.length; index += 1) samples[index] = Math.max(-1, Math.min(1, samples[index]));
-    validateSamples(samples);
-    return samples;
+    return inspectDecodedAudio(decoded, Math.min(MAX_SECONDS, Number(health?.limits?.max_seconds) || MAX_SECONDS));
   } finally { await context.close().catch(() => {}); }
 }
 
@@ -269,17 +253,17 @@ async function createVideo(event) {
     if (!health || healthMessage(health)) await checkHealth();
     const engineError = healthMessage(health);
     if (engineError) throw new Error(engineError);
+    validateAudioFile(source.file, health?.limits?.max_bytes);
     ui['source-note'].textContent = '브라우저에서 음악 길이와 형식을 확인하고 있어요. 아직 전송 전입니다.';
     ui['source-note'].hidden = false;
-    const samples = await decodeAudio(source.file);
+    const audioInfo = await decodeAudio(source.file);
     if (lifetime.signal.aborted) return;
-    ui['source-note'].textContent = `${formatTime(samples.length / SAMPLE_RATE)} · 16kHz 모노 · 이 PC의 로컬 서버로 전달 중`;
-    const payload = {audio:{samples:Array.from(samples),sample_rate:SAMPLE_RATE},title,theme,seed:7};
-    if (lyrics) payload.lyrics = lyrics;
-    const body = JSON.stringify(payload);
-    const maxBytes = Number(health?.limits?.max_bytes) || 24 * 1024 * 1024;
-    if (new TextEncoder().encode(body).byteLength > maxBytes) throw new Error('음악 전송 크기가 제한을 넘었어요. 더 짧은 구간으로 다시 시도해 주세요.');
-    const accepted = validateJob(await (await request('/api/mv/jobs', {method:'POST',headers:{'Content-Type':'application/json'},body}, 60000)).json());
+    ui['source-note'].textContent = `${formatTime(audioInfo.duration)} · ${audioInfo.channels === 1 ? '모노' : `${audioInfo.channels}채널`} · 원본 음악 파일을 이 PC의 로컬 서버로 전달 중`;
+    const metadata = {title,theme,seed:7};
+    if (lyrics) metadata.lyrics = lyrics;
+    const body = createUploadBody(source.file, metadata, health?.limits?.max_bytes);
+    // The browser sets the multipart boundary; audio is the unmodified source File.
+    const accepted = validateJob(await (await request('/api/mv/uploads', {method:'POST',body}, 60000)).json());
     activeId = accepted.id;
     startClock();
     persistJob();

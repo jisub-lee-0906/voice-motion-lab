@@ -3,6 +3,9 @@ from __future__ import annotations
 import argparse
 import asyncio
 import ctypes
+from email import policy
+from email.message import Message
+from email.parser import BytesParser
 import json
 import mimetypes
 import os
@@ -46,12 +49,115 @@ def unique_object(pairs):
     return result
 
 
-def parse_job(raw):
-    import numpy as np
+def parse_json_object(raw, message='올바른 메타데이터 JSON이 아닙니다.'):
     try:
         data = json.loads(raw.decode('utf-8'), parse_constant=reject_constant, object_pairs_hook=unique_object)
     except (ValueError, UnicodeError, RecursionError) as error:
-        raise RequestError('올바른 오디오 JSON 요청이 아닙니다.') from error
+        raise RequestError(message) from error
+    if not isinstance(data, dict):
+        raise RequestError(message)
+    return data
+
+
+def validate_metadata(data):
+    if not isinstance(data, dict) or set(data) - {'title', 'theme', 'seed', 'lyrics'}:
+        raise RequestError('지원하지 않는 메타데이터 필드입니다.')
+    theme = data.get('theme', 'auto')
+    seed = data.get('seed', 7)
+    if not isinstance(theme, str) or theme not in {'auto', 'bloom', 'fracture', 'orbit'}:
+        raise RequestError('지원하지 않는 테마입니다.')
+    if isinstance(seed, bool) or not isinstance(seed, int) or not 0 <= seed <= 2147483647:
+        raise RequestError('시드는 0~2147483647 사이의 정수여야 합니다.')
+    title = data.get('title', 'Untitled')
+    lyrics = data.get('lyrics', '')
+    if not isinstance(title, str) or not 1 <= len(title.strip()) <= 120 or any(ord(x) < 32 for x in title):
+        raise RequestError('제목은 1~120자로 입력해주세요.')
+    if not isinstance(lyrics, str) or len(lyrics) > 6000 or '\x00' in lyrics:
+        raise RequestError('선택 가사는 최대 6,000자입니다.')
+    return {'title': title.strip(), 'theme': theme, 'seed': seed, 'lyrics': lyrics.strip()}
+
+
+def parse_upload(raw, content_type):
+    """Exactly two ordinary binary multipart parts; filenames never become paths."""
+    if not isinstance(raw, bytes) or not 0 < len(raw) <= MAX_BODY:
+        raise RequestError('원본 오디오 요청은 최대 24MiB입니다.', 413)
+    if not isinstance(content_type, str) or any(x in content_type for x in ('\r', '\n')) or len(content_type) > 200:
+        raise RequestError('올바른 multipart 요청 형식이 아닙니다.', 415)
+    try:
+        content_type.encode('ascii')
+    except UnicodeError as error:
+        raise RequestError('올바른 multipart 요청 형식이 아닙니다.', 415) from error
+    header = Message()
+    header['Content-Type'] = content_type
+    params = header.get_params() or []
+    if header.get_content_type() != 'multipart/form-data' or len(params) != 2 or params[1][0].lower() != 'boundary':
+        raise RequestError('metadata와 audio가 있는 multipart/form-data 요청이 필요합니다.', 415)
+    boundary = header.get_boundary()
+    if not boundary or not re.fullmatch(r"[A-Za-z0-9'()+_,./:=?-]{1,70}", boundary):
+        raise RequestError('multipart 경계가 올바르지 않습니다.')
+    marker = b'--' + boundary.encode('ascii')
+    if not raw.startswith(marker+b'\r\n') or not (raw.endswith(marker+b'--\r\n') or raw.endswith(marker+b'--')):
+        raise RequestError('multipart 오디오 전송이 끝나지 않았습니다.')
+    # Bound structure before the email parser constructs any MIME object tree.
+    # A valid two-part body has one middle delimiter and one closing delimiter.
+    if raw.count(b'\r\n'+marker) != 2:
+        raise RequestError('metadata와 audio를 각각 한 개씩 보내주세요.')
+    starts = [len(marker)+2]
+    middle = raw.find(b'\r\n'+marker+b'\r\n')
+    if middle < 0:
+        raise RequestError('multipart 필드 구분이 올바르지 않습니다.')
+    starts.append(middle+len(marker)+4)
+    for start in starts:
+        end = raw.find(b'\r\n\r\n',start,start+4096)
+        if end < 0:
+            raise RequestError('multipart 필드 헤더는 최대 4KiB입니다.')
+        headers = raw[start:end]
+        if any(line.startswith((b' ',b'\t')) for line in headers.split(b'\r\n')):
+            raise RequestError('접힌 multipart 헤더는 지원하지 않습니다.')
+        compact = b''.join(headers.lower().split())
+        if b'multipart/' in compact or b'message/' in compact:
+            raise RequestError('중첩된 multipart나 메시지는 허용되지 않습니다.')
+    message = BytesParser(policy=policy.HTTP).parsebytes(b'Content-Type: '+content_type.encode('ascii')+b'\r\nMIME-Version: 1.0\r\n\r\n'+raw)
+    if message.defects or any(getattr(value, 'defects', ()) for _, value in message.items()) or not message.is_multipart() or message.preamble or message.epilogue:
+        raise RequestError('multipart 요청 구조가 올바르지 않습니다.')
+    parts = list(message.iter_parts())
+    if len(parts) != 2:
+        raise RequestError('metadata와 audio를 각각 한 개씩 보내주세요.')
+    values = {}
+    for part in parts:
+        if part.defects or any(getattr(value, 'defects', ()) for _, value in part.items()) or part.is_multipart():
+            raise RequestError('중첩되거나 손상된 multipart는 허용되지 않습니다.')
+        names = [name.lower() for name in part.keys()]
+        if any(name not in {'content-disposition', 'content-type'} for name in names) or len(names) != len(set(names)):
+            raise RequestError('지원하지 않거나 중복된 multipart 헤더입니다.')
+        if part.get_content_disposition() != 'form-data':
+            raise RequestError('multipart form-data가 필요합니다.')
+        disposition = part.get_params(header='content-disposition') or []
+        disposition_names = [name.lower() for name, _ in disposition[1:]]
+        if len(disposition_names) != len(set(disposition_names)) or any(name not in {'name', 'filename'} for name in disposition_names):
+            raise RequestError('multipart 필드 정보가 올바르지 않습니다.')
+        name = part.get_param('name', header='content-disposition')
+        if name not in {'metadata', 'audio'} or name in values:
+            raise RequestError('metadata와 audio를 각각 한 개씩 보내주세요.')
+        mime = part.get_content_type()
+        if name == 'metadata':
+            if 'filename' in disposition_names or mime not in {'text/plain', 'application/json'} or part.get_content_charset() not in (None, 'utf-8', 'us-ascii'):
+                raise RequestError('metadata는 UTF-8 JSON 문자열이어야 합니다.')
+        elif mime != 'application/octet-stream' and not mime.startswith('audio/'):
+            raise RequestError('audio 필드에는 음악 파일이 필요합니다.', 415)
+        payload = part.get_payload(decode=True)
+        if not isinstance(payload, bytes) or not payload:
+            raise RequestError('비어 있는 multipart 필드입니다.')
+        values[name] = payload
+    if set(values) != {'metadata', 'audio'} or len(values['metadata']) > 64 * 1024:
+        raise RequestError('metadata는 최대 64KiB이며 audio 파일이 함께 필요합니다.')
+    metadata = validate_metadata(parse_json_object(values['metadata']))
+    return {'raw_audio': values['audio'], **metadata}
+
+
+def parse_job(raw):
+    import numpy as np
+    data = parse_json_object(raw, '올바른 오디오 JSON 요청이 아닙니다.')
     if not isinstance(data, dict) or set(data) - {'audio', 'title', 'theme', 'seed', 'lyrics'}:
         raise RequestError('지원하지 않는 요청 필드입니다.')
     audio = data.get('audio')
@@ -67,19 +173,7 @@ def parse_job(raw):
         raise RequestError('오디오 샘플 범위가 올바르지 않습니다.')
     if float(np.sqrt(np.mean(samples**2))) < .0008:
         raise RequestError('소리가 거의 없는 파일입니다. 보컬이 들리는 구간을 선택해주세요.')
-    theme = data.get('theme', 'auto')
-    seed = data.get('seed', 7)
-    if theme not in {'auto', 'bloom', 'fracture', 'orbit'}:
-        raise RequestError('지원하지 않는 테마입니다.')
-    if isinstance(seed, bool) or not isinstance(seed, int) or not 0 <= seed <= 2147483647:
-        raise RequestError('시드는 0~2147483647 사이의 정수여야 합니다.')
-    title = data.get('title', 'Untitled')
-    lyrics = data.get('lyrics', '')
-    if not isinstance(title, str) or not 1 <= len(title.strip()) <= 120 or any(ord(x) < 32 for x in title):
-        raise RequestError('제목은 1~120자로 입력해주세요.')
-    if not isinstance(lyrics, str) or len(lyrics) > 6000 or '\x00' in lyrics:
-        raise RequestError('선택 가사는 최대 6,000자입니다.')
-    return {'samples': samples, 'title': title.strip(), 'theme': theme, 'seed': seed, 'lyrics': lyrics.strip()}
+    return {'samples': samples, **validate_metadata({key:value for key,value in data.items() if key != 'audio'})}
 
 
 def available_ram_gb():
@@ -105,6 +199,72 @@ def comfy_ready():
                 'provider': 'comfy-sdk-local-api-v2'}
     except Exception:
         return {'available': False, 'provider': 'comfy-sdk-local-api-v2'}
+
+
+def normalize_upload_subprocess(source_path, target, timeout=45):
+    """Kill/wait only our single native-decoder Python process on a deadline.
+
+    PyAV performs decoding in this process; no ffmpeg CLI or child process is
+    launched. Native stdout/stderr are deliberately discarded instead of buffering
+    attacker-controlled log volume. A small structured result is the sole output.
+    """
+    source_path, target = Path(source_path), Path(target)
+    result_path = source_path.parent / 'normalization-result.json'
+    log_path = source_path.parent / 'normalization.log'
+    env = dict(os.environ)
+    env.update({'CUDA_VISIBLE_DEVICES':'', 'OMP_NUM_THREADS':'2', 'MKL_NUM_THREADS':'2',
+                'OPENBLAS_NUM_THREADS':'2', 'NUMEXPR_NUM_THREADS':'2', 'PYTHONNOUSERSITE':'1',
+                'PYTHONIOENCODING':'utf-8', 'TEMP':str(ROOT/'temp'), 'TMP':str(ROOT/'temp')})
+    command = [sys.executable, str(ROOT/'src/voice_motion/mv_audio.py'),
+               '--source',str(source_path),'--target',str(target),'--result',str(result_path)]
+    begun = time.monotonic()
+    child = subprocess.Popen(command, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL, cwd=ROOT, env=env,
+        creationflags=getattr(subprocess,'CREATE_NO_WINDOW',0))
+    try:
+        try:
+            code = child.wait(timeout=timeout)
+        except subprocess.TimeoutExpired:
+            child.kill()
+            child.wait(timeout=5)
+            log_path.write_text(f'normalization timed out after {timeout:g} seconds; child killed and reaped\n',encoding='utf-8')
+            raise RequestError('음악 파일을 읽는 시간이 제한을 넘었습니다. 다른 WAV·MP3 구간으로 다시 시도해주세요.',408) from None
+        if not result_path.is_file() or result_path.is_symlink() or result_path.stat().st_size > 64*1024:
+            raise RequestError('음악 정규화 결과를 확인할 수 없습니다. 다른 파일로 다시 시도해주세요.')
+        record = parse_json_object(result_path.read_bytes())
+        if code != 0 or record.get('ok') is not True:
+            message = record.get('error')
+            if not isinstance(message,str) or not message or len(message)>300:
+                message = '음악 파일을 안전하게 읽을 수 없습니다.'
+            raise RequestError(message)
+        metadata = record.get('audio')
+        if not isinstance(metadata,dict) or not target.is_file() or target.is_symlink():
+            raise RequestError('정규화된 음악 파일을 확인할 수 없습니다.')
+        log_path.write_text(f'normalization succeeded in {time.monotonic()-begun:.3f} seconds; native output discarded\n',encoding='utf-8')
+        return metadata
+    finally:
+        if child.poll() is None:
+            child.kill()
+            child.wait(timeout=5)
+
+
+class JobAdmission:
+    """Idempotent token: the request owns the semaphore until worker handoff."""
+    def __init__(self,manager):
+        self.manager, self.held = manager, True
+
+    def validate(self,manager):
+        if self.manager is not manager or not self.held:
+            raise RequestError('제작 요청의 실행 권한이 올바르지 않습니다.',500)
+
+    def release(self):
+        if self.held:
+            self.held = False
+            self.manager.capacity.release()
+
+    def transfer_to_worker(self):
+        self.validate(self.manager)
+        self.held = False
 
 
 class JobManager:
@@ -154,7 +314,8 @@ class JobManager:
             out = ROOT / 'output/mv' / job_id / 'job.json'
             out.write_text(json.dumps(self.jobs[job_id], ensure_ascii=False, indent=2), encoding='utf-8')
 
-    def create(self, payload):
+    def reserve_upload(self):
+        """Called before upload body read/parser, so at most one copy tree exists."""
         if not model_status()['available']:
             raise RequestError('전사 모델을 준비한 뒤 다시 시도해주세요. tools/setup_mv_models.py', 503)
         if not comfy_ready()['available']:
@@ -164,28 +325,53 @@ class JobManager:
             raise RequestError('다른 작업과 메모리가 겹칩니다. 여유 RAM 5GB 이상일 때 다시 시도해주세요.', 503)
         if not self.capacity.acquire(blocking=False):
             raise RequestError('다른 MV를 제작 중입니다. 완료 후 다시 눌러주세요.', 429)
+        return JobAdmission(self)
+
+    def create(self, payload, admission=None):
+        # Legacy JSON callers acquire here. Multipart requests already hold one
+        # token before body read/parse and pass it through without reacquiring.
+        admission = admission or self.reserve_upload()
+        admission.validate(self)
         try:
             if self.created_count >= 20:
                 raise RequestError('이 실행 세션의 최대 작업 수에 도달했습니다. 결과를 보존한 뒤 앱을 다시 시작해주세요.', 429)
+            # Rejected uploaded media also consumes one admission: retained private
+            # upload files cannot grow without bound during a single server run.
+            self.created_count += 1
+            payload = dict(payload)
             job_id = uuid.uuid4().hex
             source_dir = ROOT / 'input/mv' / job_id
             output_dir = ROOT / 'output/mv' / job_id
+            approved_root = ROOT.resolve()
+            if source_dir.resolve() != approved_root / 'input/mv' / job_id or output_dir.resolve() != approved_root / 'output/mv' / job_id:
+                raise RequestError('프로젝트 입출력 경로가 외부 위치로 연결되어 있습니다. 격리 경로를 확인해주세요.', 503)
             source_dir.mkdir(parents=True, exist_ok=False)
             output_dir.mkdir(parents=True, exist_ok=False)
-            samples = payload.pop('samples')
-            with wave.open(str(source_dir / 'source.wav'), 'wb') as out:
-                out.setnchannels(1); out.setsampwidth(2); out.setframerate(16000)
-                out.writeframes((samples.clip(-1, 1)*32767).astype('<i2').tobytes())
+            if 'raw_audio' in payload:
+                raw_audio = payload.pop('raw_audio')
+                # The client's filename/path is ignored. Retain only this job's
+                # original bytes and canonical WAV under fixed private names.
+                (source_dir / 'upload.audio').write_bytes(raw_audio)
+                audio_metadata = normalize_upload_subprocess(source_dir/'upload.audio',source_dir/'source.wav')
+            else:
+                samples = payload.pop('samples')
+                with wave.open(str(source_dir / 'source.wav'), 'wb') as out:
+                    out.setnchannels(1); out.setsampwidth(2); out.setframerate(16000)
+                    out.writeframes((samples.clip(-1, 1)*32767).astype('<i2').tobytes())
+                audio_metadata = {'duration':len(samples)/16000, 'sample_rate':16000, 'channels':1,
+                                  'codec':'pcm_s16le', 'input_kind':'legacy_samples_json'}
+            (source_dir / 'audio-metadata.json').write_text(json.dumps(audio_metadata, ensure_ascii=False, indent=2), encoding='utf-8')
             if payload['lyrics']:
                 (source_dir / 'provided-lyrics.txt').write_text(payload['lyrics'], encoding='utf-8')
             self.jobs[job_id] = {'id': job_id, 'status': 'queued', 'progress': 0,
-                'message': '로컬 제작 대기 중', 'title': payload['title'], 'created_at': time.time()}
-            self.created_count += 1
+                'message': '로컬 제작 대기 중', 'title': payload['title'], 'created_at': time.time(),
+                'audio': audio_metadata}
             self.update(job_id)
             threading.Thread(target=self.run, args=(job_id, payload), daemon=True, name=f'mv-{job_id[:8]}').start()
+            admission.transfer_to_worker()
             return self.get(job_id)
         except Exception:
-            self.capacity.release()
+            admission.release()
             raise
 
     def run(self, job_id, payload):
@@ -367,22 +553,33 @@ class Handler(BaseHTTPRequestHandler):
             pass
 
     def do_POST(self):
+        admission = None
         try:
             self.local()
-            if urlsplit(self.path).path != '/api/mv/jobs':
+            route = urlsplit(self.path).path
+            if route not in {'/api/mv/jobs', '/api/mv/uploads'}:
                 raise RequestError('API 경로를 찾을 수 없습니다.', 404)
-            if self.headers.get('Transfer-Encoding') or not re.fullmatch(r'\d{1,9}', self.headers.get('Content-Length', '')):
+            if self.headers.get('Transfer-Encoding') or len(self.headers.get_all('Content-Length') or []) != 1 or not re.fullmatch(r'\d{1,9}', self.headers.get('Content-Length', '')):
                 raise RequestError('Content-Length가 필요합니다.', 411)
             size = int(self.headers['Content-Length'])
             if size > MAX_BODY:
                 self.close_connection = True
                 raise RequestError('오디오 요청은 최대24MiB입니다.', 413)
-            if self.headers.get('Content-Type', '').split(';')[0].strip() != 'application/json':
+            if len(self.headers.get_all('Content-Type') or []) != 1:
+                raise RequestError('요청 Content-Type을 하나만 지정해주세요.', 415)
+            content_type = self.headers.get('Content-Type', '')
+            mime = content_type.split(';')[0].strip().lower()
+            if route == '/api/mv/jobs' and mime != 'application/json':
                 raise RequestError('JSON 오디오 요청이 필요합니다.', 415)
+            if route == '/api/mv/uploads' and mime != 'multipart/form-data':
+                raise RequestError('원본 음악은 multipart/form-data로 보내주세요.', 415)
+            if route == '/api/mv/uploads':
+                admission = self.manager.reserve_upload()
             self.connection.settimeout(30)
             raw = self.rfile.read(size)
             if len(raw) != size: raise RequestError('오디오 전송이 끝나지 않았습니다.')
-            job = self.manager.create(parse_job(raw))
+            payload = parse_upload(raw, content_type) if route == '/api/mv/uploads' else parse_job(raw)
+            job = self.manager.create(payload,admission=admission) if admission else self.manager.create(payload)
             self.json(202, {'id': job['id'], 'status': job['status']})
         except RequestError as error:
             self.close_connection = True
@@ -392,6 +589,9 @@ class Handler(BaseHTTPRequestHandler):
         except Exception:
             self.close_connection = True
             self.json(500, {'error': '로컬 제작 요청을 처리하지 못했습니다.'})
+        finally:
+            if admission:
+                admission.release()
 
 
 if __name__ == '__main__':

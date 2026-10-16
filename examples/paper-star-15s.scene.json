@@ -1,0 +1,1449 @@
+{
+  "format": "voice-motion-directed-scene",
+  "version": 1,
+  "stage": "art_action_study",
+  "canvas": {
+    "width": 960,
+    "height": 540,
+    "fps": 24,
+    "frames": 360
+  },
+  "status": "planning_only_no_art_assets_or_rendered_output",
+  "reference_evidence": "Original causal scene proposal. No claims of measured motion or beat analysis of named reference works.",
+  "audio": {
+    "relative_asset": "audio/source.wav",
+    "sha256": null,
+    "rights": "pending selection of owned/licensed excerpt; no audio file supplied",
+    "rights_status": "pending"
+  },
+  "lyrics": {
+    "source": "fixture_not_asr",
+    "timing_source": "planning_placeholder",
+    "segments": []
+  },
+  "music_cues": [],
+  "assets": [
+    {
+      "id": "A00",
+      "kind": "rgba_image",
+      "relative_asset": "art/actor-master.png",
+      "sha256": null,
+      "provenance": {
+        "kind": "planned_model_generated",
+        "license": null,
+        "note": "Not generated or authored yet; no placeholder image is supplied."
+      },
+      "review": {
+        "status": "pending",
+        "by": null
+      }
+    },
+    {
+      "id": "A01",
+      "kind": "rgba_image",
+      "relative_asset": "art/actor-pocket.png",
+      "sha256": null,
+      "provenance": {
+        "kind": "planned_model_generated",
+        "license": null,
+        "note": "Not generated or authored yet; no placeholder image is supplied."
+      },
+      "review": {
+        "status": "pending",
+        "by": null
+      }
+    },
+    {
+      "id": "A02",
+      "kind": "rgba_image",
+      "relative_asset": "art/actor-extract.png",
+      "sha256": null,
+      "provenance": {
+        "kind": "planned_model_generated",
+        "license": null,
+        "note": "Not generated or authored yet; no placeholder image is supplied."
+      },
+      "review": {
+        "status": "pending",
+        "by": null
+      }
+    },
+    {
+      "id": "A03",
+      "kind": "rgba_image",
+      "relative_asset": "art/actor-offer.png",
+      "sha256": null,
+      "provenance": {
+        "kind": "planned_model_generated",
+        "license": null,
+        "note": "Not generated or authored yet; no placeholder image is supplied."
+      },
+      "review": {
+        "status": "pending",
+        "by": null
+      }
+    },
+    {
+      "id": "A04",
+      "kind": "rgba_image",
+      "relative_asset": "art/actor-open-hand.png",
+      "sha256": null,
+      "provenance": {
+        "kind": "planned_model_generated",
+        "license": null,
+        "note": "Not generated or authored yet; no placeholder image is supplied."
+      },
+      "review": {
+        "status": "pending",
+        "by": null
+      }
+    },
+    {
+      "id": "A05",
+      "kind": "rgba_image",
+      "relative_asset": "art/actor-look-door.png",
+      "sha256": null,
+      "provenance": {
+        "kind": "planned_model_generated",
+        "license": null,
+        "note": "Not generated or authored yet; no placeholder image is supplied."
+      },
+      "review": {
+        "status": "pending",
+        "by": null
+      }
+    },
+    {
+      "id": "H01",
+      "kind": "rgba_image",
+      "relative_asset": "art/hand-closed.png",
+      "sha256": null,
+      "provenance": {
+        "kind": "planned_model_generated",
+        "license": null,
+        "note": "Not generated or authored yet; no placeholder image is supplied."
+      },
+      "review": {
+        "status": "pending",
+        "by": null
+      }
+    },
+    {
+      "id": "H02",
+      "kind": "rgba_image",
+      "relative_asset": "art/hand-opening.png",
+      "sha256": null,
+      "provenance": {
+        "kind": "planned_model_generated",
+        "license": null,
+        "note": "Not generated or authored yet; no placeholder image is supplied."
+      },
+      "review": {
+        "status": "pending",
+        "by": null
+      }
+    },
+    {
+      "id": "H03",
+      "kind": "rgba_image",
+      "relative_asset": "art/hand-open.png",
+      "sha256": null,
+      "provenance": {
+        "kind": "planned_model_generated",
+        "license": null,
+        "note": "Not generated or authored yet; no placeholder image is supplied."
+      },
+      "review": {
+        "status": "pending",
+        "by": null
+      }
+    },
+    {
+      "id": "P01",
+      "kind": "vector",
+      "relative_asset": "art/paper-star.svg",
+      "sha256": null,
+      "provenance": {
+        "kind": "planned_authored",
+        "license": null,
+        "note": "Not generated or authored yet; no placeholder image is supplied."
+      },
+      "review": {
+        "status": "pending",
+        "by": null
+      }
+    },
+    {
+      "id": "P02",
+      "kind": "vector",
+      "relative_asset": "art/door.svg",
+      "sha256": null,
+      "provenance": {
+        "kind": "planned_authored",
+        "license": null,
+        "note": "Not generated or authored yet; no placeholder image is supplied."
+      },
+      "review": {
+        "status": "pending",
+        "by": null
+      }
+    },
+    {
+      "id": "B01",
+      "kind": "vector",
+      "relative_asset": "art/night-space.svg",
+      "sha256": null,
+      "provenance": {
+        "kind": "planned_authored",
+        "license": null,
+        "note": "Not generated or authored yet; no placeholder image is supplied."
+      },
+      "review": {
+        "status": "pending",
+        "by": null
+      }
+    },
+    {
+      "id": "B02",
+      "kind": "vector",
+      "relative_asset": "art/door-interior.svg",
+      "sha256": null,
+      "provenance": {
+        "kind": "planned_authored",
+        "license": null,
+        "note": "Not generated or authored yet; no placeholder image is supplied."
+      },
+      "review": {
+        "status": "pending",
+        "by": null
+      }
+    }
+  ],
+  "actors": [
+    {
+      "id": "courier_01",
+      "asset_ids": [
+        "A00",
+        "A01",
+        "A02",
+        "A03",
+        "A04",
+        "A05",
+        "H01",
+        "H02",
+        "H03"
+      ],
+      "identity": {
+        "hair": "black bob",
+        "coat": "coral raincoat",
+        "trousers": "ink",
+        "clip": "ivory crescent",
+        "adult": true
+      },
+      "root_track": {
+        "interpolation": "hermite",
+        "keys": [
+          {
+            "frame": 0,
+            "value": [
+              360,
+              470
+            ],
+            "tangent": [
+              0,
+              0
+            ]
+          },
+          {
+            "frame": 359,
+            "value": [
+              360,
+              470
+            ],
+            "tangent": [
+              0,
+              0
+            ]
+          }
+        ]
+      },
+      "anchors": {
+        "pocket": [
+          25,
+          -165
+        ],
+        "right_shoulder": [
+          35,
+          -235
+        ],
+        "eyes": [
+          0,
+          -290
+        ]
+      },
+      "anchor_tracks": {
+        "right_grip": {
+          "interpolation": "hermite",
+          "keys": [
+            {
+              "frame": 0,
+              "value": [
+                35,
+                -155
+              ],
+              "tangent": [
+                0,
+                0
+              ]
+            },
+            {
+              "frame": 18,
+              "value": [
+                25,
+                -145
+              ],
+              "tangent": [
+                0,
+                0
+              ]
+            },
+            {
+              "frame": 24,
+              "value": [
+                25,
+                -165
+              ],
+              "tangent": [
+                0,
+                0
+              ]
+            },
+            {
+              "frame": 42,
+              "value": [
+                85,
+                -245
+              ],
+              "tangent": [
+                0,
+                0
+              ]
+            },
+            {
+              "frame": 78,
+              "value": [
+                140,
+                -230
+              ],
+              "tangent": [
+                0,
+                0
+              ]
+            },
+            {
+              "frame": 96,
+              "value": [
+                140,
+                -230
+              ],
+              "tangent": [
+                0,
+                0
+              ]
+            },
+            {
+              "frame": 114,
+              "value": [
+                140,
+                -230
+              ],
+              "tangent": [
+                0,
+                0
+              ]
+            },
+            {
+              "frame": 131,
+              "value": [
+                140,
+                -230
+              ],
+              "tangent": [
+                0,
+                0
+              ]
+            },
+            {
+              "frame": 132,
+              "value": [
+                140,
+                -230
+              ],
+              "tangent": [
+                0,
+                0
+              ]
+            },
+            {
+              "frame": 216,
+              "value": [
+                140,
+                -230
+              ],
+              "tangent": [
+                0,
+                0
+              ]
+            },
+            {
+              "frame": 288,
+              "value": [
+                40,
+                -155
+              ],
+              "tangent": [
+                0,
+                0
+              ]
+            },
+            {
+              "frame": 359,
+              "value": [
+                40,
+                -155
+              ],
+              "tangent": [
+                0,
+                0
+              ]
+            }
+          ]
+        }
+      },
+      "right_arm": {
+        "shoulder_anchor": "right_shoulder",
+        "grip_anchor": "right_grip",
+        "upper_length": 76,
+        "fore_length": 78,
+        "bend": 1
+      },
+      "initial_state": {
+        "right_hand": "closed"
+      },
+      "look_target": "paper_star_01",
+      "eye_anchor": "eyes",
+      "tracks": {
+        "hand_open_fraction": {
+          "interpolation": "hermite",
+          "keys": [
+            {
+              "frame": 0,
+              "value": 0,
+              "tangent": 0
+            },
+            {
+              "frame": 96,
+              "value": 0,
+              "tangent": 0
+            },
+            {
+              "frame": 114,
+              "value": 0.5,
+              "tangent": 0
+            },
+            {
+              "frame": 131,
+              "value": 1,
+              "tangent": 0
+            },
+            {
+              "frame": 359,
+              "value": 1,
+              "tangent": 0
+            }
+          ]
+        },
+        "body_turn_deg": {
+          "interpolation": "hermite",
+          "keys": [
+            {
+              "frame": 0,
+              "value": 0,
+              "tangent": 0
+            },
+            {
+              "frame": 216,
+              "value": 0,
+              "tangent": 0
+            },
+            {
+              "frame": 288,
+              "value": 12,
+              "tangent": 0
+            },
+            {
+              "frame": 359,
+              "value": 12,
+              "tangent": 0
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "props": [
+    {
+      "id": "paper_star_01",
+      "asset_id": "P01",
+      "initial_state": "pocket_hidden",
+      "states": [
+        "pocket_hidden",
+        "held_folded",
+        "held_opening",
+        "released",
+        "floating_open",
+        "door_seal"
+      ],
+      "transitions": [
+        [
+          "pocket_hidden",
+          "held_folded"
+        ],
+        [
+          "held_folded",
+          "held_opening"
+        ],
+        [
+          "held_opening",
+          "released"
+        ],
+        [
+          "released",
+          "floating_open"
+        ],
+        [
+          "floating_open",
+          "door_seal"
+        ]
+      ],
+      "position_track": {
+        "interpolation": "hermite",
+        "keys": [
+          {
+            "frame": 0,
+            "value": [
+              385,
+              305
+            ],
+            "tangent": [
+              0,
+              0
+            ]
+          },
+          {
+            "frame": 24,
+            "value": [
+              385,
+              305
+            ],
+            "tangent": [
+              0,
+              0
+            ]
+          },
+          {
+            "frame": 132,
+            "value": [
+              500,
+              240
+            ],
+            "tangent": [
+              0,
+              0
+            ]
+          },
+          {
+            "frame": 168,
+            "value": [
+              620,
+              180
+            ],
+            "tangent": [
+              0,
+              0
+            ]
+          },
+          {
+            "frame": 192,
+            "value": [
+              680,
+              155
+            ],
+            "tangent": [
+              0,
+              0
+            ]
+          },
+          {
+            "frame": 215,
+            "value": [
+              720,
+              190
+            ],
+            "tangent": [
+              0,
+              0
+            ]
+          },
+          {
+            "frame": 216,
+            "value": [
+              720,
+              190
+            ],
+            "tangent": [
+              0,
+              0
+            ]
+          },
+          {
+            "frame": 228,
+            "value": [
+              720,
+              140
+            ],
+            "tangent": [
+              0,
+              0
+            ]
+          },
+          {
+            "frame": 359,
+            "value": [
+              720,
+              140
+            ],
+            "tangent": [
+              0,
+              0
+            ]
+          }
+        ]
+      },
+      "tracks": {
+        "fold": {
+          "interpolation": "hermite",
+          "keys": [
+            {
+              "frame": 0,
+              "value": 0,
+              "tangent": 0
+            },
+            {
+              "frame": 132,
+              "value": 0,
+              "tangent": 0
+            },
+            {
+              "frame": 168,
+              "value": 0.5,
+              "tangent": 0
+            },
+            {
+              "frame": 192,
+              "value": 1,
+              "tangent": 0
+            },
+            {
+              "frame": 359,
+              "value": 1,
+              "tangent": 0
+            }
+          ]
+        },
+        "rotation_deg": {
+          "interpolation": "hermite",
+          "keys": [
+            {
+              "frame": 0,
+              "value": 0,
+              "tangent": 0
+            },
+            {
+              "frame": 132,
+              "value": 0,
+              "tangent": 0
+            },
+            {
+              "frame": 168,
+              "value": 60,
+              "tangent": 0
+            },
+            {
+              "frame": 192,
+              "value": 120,
+              "tangent": 0
+            },
+            {
+              "frame": 215,
+              "value": 120,
+              "tangent": 0
+            },
+            {
+              "frame": 359,
+              "value": 120,
+              "tangent": 0
+            }
+          ]
+        },
+        "visible_fraction": {
+          "interpolation": "smoothstep",
+          "keys": [
+            {
+              "frame": 0,
+              "value": 0,
+              "tangent": 0
+            },
+            {
+              "frame": 24,
+              "value": 0,
+              "tangent": 0
+            },
+            {
+              "frame": 42,
+              "value": 1,
+              "tangent": 0
+            },
+            {
+              "frame": 359,
+              "value": 1,
+              "tangent": 0
+            }
+          ]
+        }
+      },
+      "occlusion": {
+        "pocket_front_until_frame": 42,
+        "method": "registered_pocket_mask_required_not_rendered"
+      }
+    },
+    {
+      "id": "door_01",
+      "asset_id": "P02",
+      "initial_state": "absent",
+      "states": [
+        "absent",
+        "tracing",
+        "closed_outline",
+        "opening",
+        "open"
+      ],
+      "transitions": [
+        [
+          "absent",
+          "tracing"
+        ],
+        [
+          "tracing",
+          "closed_outline"
+        ],
+        [
+          "closed_outline",
+          "opening"
+        ],
+        [
+          "opening",
+          "open"
+        ]
+      ],
+      "position_track": {
+        "interpolation": "hermite",
+        "keys": [
+          {
+            "frame": 0,
+            "value": [
+              720,
+              305
+            ],
+            "tangent": [
+              0,
+              0
+            ]
+          },
+          {
+            "frame": 359,
+            "value": [
+              720,
+              305
+            ],
+            "tangent": [
+              0,
+              0
+            ]
+          }
+        ]
+      },
+      "inner_bounds": [
+        650,
+        150,
+        790,
+        470
+      ],
+      "tracks": {
+        "trace_progress": {
+          "interpolation": "linear",
+          "keys": [
+            {
+              "frame": 0,
+              "value": 0,
+              "tangent": 0
+            },
+            {
+              "frame": 216,
+              "value": 0,
+              "tangent": 0
+            },
+            {
+              "frame": 228,
+              "value": 0,
+              "tangent": 0
+            },
+            {
+              "frame": 264,
+              "value": 1,
+              "tangent": 0
+            },
+            {
+              "frame": 359,
+              "value": 1,
+              "tangent": 0
+            }
+          ]
+        },
+        "open_fraction": {
+          "interpolation": "smoothstep",
+          "keys": [
+            {
+              "frame": 0,
+              "value": 0,
+              "tangent": 0
+            },
+            {
+              "frame": 264,
+              "value": 0,
+              "tangent": 0
+            },
+            {
+              "frame": 288,
+              "value": 1,
+              "tangent": 0
+            },
+            {
+              "frame": 359,
+              "value": 1,
+              "tangent": 0
+            }
+          ]
+        }
+      },
+      "trace": {
+        "origin_prop": "paper_star_01",
+        "dock_frame": 228,
+        "require_source_state": "door_seal",
+        "points": [
+          [
+            720,
+            140
+          ],
+          [
+            800,
+            140
+          ],
+          [
+            800,
+            470
+          ],
+          [
+            640,
+            470
+          ],
+          [
+            640,
+            140
+          ],
+          [
+            720,
+            140
+          ]
+        ]
+      }
+    }
+  ],
+  "shots": [
+    {
+      "id": "S01",
+      "range": [
+        0,
+        96
+      ],
+      "intent": "Extract the same hidden paper star and offer it; not a looped theme pose.",
+      "camera": {
+        "center": {
+          "interpolation": "hermite",
+          "keys": [
+            {
+              "frame": 0,
+              "value": [
+                410,
+                290
+              ],
+              "tangent": [
+                0,
+                0
+              ]
+            },
+            {
+              "frame": 95,
+              "value": [
+                410,
+                290
+              ],
+              "tangent": [
+                0,
+                0
+              ]
+            }
+          ]
+        },
+        "zoom": {
+          "interpolation": "hermite",
+          "keys": [
+            {
+              "frame": 0,
+              "value": 1.1,
+              "tangent": 0
+            },
+            {
+              "frame": 95,
+              "value": 1.1,
+              "tangent": 0
+            }
+          ]
+        }
+      },
+      "actions": [
+        {
+          "id": "extract",
+          "kind": "reach_and_extract",
+          "range": [
+            0,
+            42
+          ],
+          "channels": [
+            "actors.courier_01.anchors.right_grip",
+            "actors.courier_01.right_arm",
+            "props.paper_star_01.attachment",
+            "props.paper_star_01.visible_fraction"
+          ],
+          "actor": "courier_01",
+          "prop": "paper_star_01"
+        },
+        {
+          "id": "offer",
+          "kind": "offer",
+          "range": [
+            42,
+            96
+          ],
+          "channels": [
+            "actors.courier_01.anchors.right_grip",
+            "actors.courier_01.right_arm"
+          ],
+          "actor": "courier_01",
+          "prop": "paper_star_01"
+        }
+      ],
+      "keyposes": [
+        {
+          "frame": 0,
+          "actor": "courier_01",
+          "asset_id": "A01"
+        },
+        {
+          "frame": 24,
+          "actor": "courier_01",
+          "asset_id": "A01"
+        },
+        {
+          "frame": 42,
+          "actor": "courier_01",
+          "asset_id": "A02"
+        },
+        {
+          "frame": 78,
+          "actor": "courier_01",
+          "asset_id": "A03"
+        },
+        {
+          "frame": 95,
+          "actor": "courier_01",
+          "asset_id": "A03"
+        }
+      ],
+      "typography": {
+        "lyric_segment_ids": [],
+        "preferred_box": [
+          650,
+          60,
+          920,
+          175
+        ],
+        "avoid": [
+          "face",
+          "right_hand",
+          "paper_star_01"
+        ],
+        "status": "pending_actual_audio"
+      }
+    },
+    {
+      "id": "S02",
+      "range": [
+        96,
+        216
+      ],
+      "intent": "Open the hand, visibly detach once, and unfold the same star along a flight arc.",
+      "camera": {
+        "center": {
+          "interpolation": "hermite",
+          "keys": [
+            {
+              "frame": 96,
+              "value": [
+                500,
+                240
+              ],
+              "tangent": [
+                0,
+                0
+              ]
+            },
+            {
+              "frame": 215,
+              "value": [
+                500,
+                240
+              ],
+              "tangent": [
+                0,
+                0
+              ]
+            }
+          ]
+        },
+        "zoom": {
+          "interpolation": "hermite",
+          "keys": [
+            {
+              "frame": 96,
+              "value": 1.8,
+              "tangent": 0
+            },
+            {
+              "frame": 215,
+              "value": 1.8,
+              "tangent": 0
+            }
+          ]
+        }
+      },
+      "actions": [
+        {
+          "id": "open_hand",
+          "kind": "open_hand",
+          "range": [
+            96,
+            132
+          ],
+          "channels": [
+            "actors.courier_01.state.right_hand",
+            "actors.courier_01.hand_open_fraction"
+          ],
+          "actor": "courier_01",
+          "prop": "paper_star_01"
+        },
+        {
+          "id": "flight",
+          "kind": "follow_arc_and_unfold",
+          "range": [
+            132,
+            216
+          ],
+          "channels": [
+            "props.paper_star_01.position",
+            "props.paper_star_01.fold",
+            "props.paper_star_01.rotation_deg"
+          ],
+          "prop": "paper_star_01"
+        },
+        {
+          "id": "follow_star",
+          "kind": "look_at",
+          "range": [
+            96,
+            216
+          ],
+          "channels": [
+            "actors.courier_01.gaze_degrees"
+          ],
+          "actor": "courier_01",
+          "prop": "paper_star_01"
+        }
+      ],
+      "keyposes": [
+        {
+          "frame": 96,
+          "actor": "courier_01",
+          "asset_id": "A03"
+        },
+        {
+          "frame": 114,
+          "actor": "courier_01",
+          "asset_id": "A03"
+        },
+        {
+          "frame": 131,
+          "actor": "courier_01",
+          "asset_id": "A04"
+        },
+        {
+          "frame": 168,
+          "actor": "courier_01",
+          "asset_id": "A04"
+        },
+        {
+          "frame": 215,
+          "actor": "courier_01",
+          "asset_id": "A04"
+        }
+      ],
+      "typography": {
+        "lyric_segment_ids": [],
+        "preferred_box": [
+          680,
+          45,
+          920,
+          180
+        ],
+        "avoid": [
+          "face",
+          "right_hand",
+          "paper_star_01"
+        ],
+        "status": "pending_actual_audio"
+      }
+    },
+    {
+      "id": "S03",
+      "range": [
+        216,
+        360
+      ],
+      "intent": "The released star causes a door outline to form, then the view passes through the opening.",
+      "camera": {
+        "center": {
+          "interpolation": "hermite",
+          "keys": [
+            {
+              "frame": 216,
+              "value": [
+                540,
+                275
+              ],
+              "tangent": [
+                0,
+                0
+              ]
+            },
+            {
+              "frame": 288,
+              "value": [
+                540,
+                275
+              ],
+              "tangent": [
+                0,
+                0
+              ]
+            },
+            {
+              "frame": 312,
+              "value": [
+                620,
+                280
+              ],
+              "tangent": [
+                0,
+                0
+              ]
+            },
+            {
+              "frame": 348,
+              "value": [
+                720,
+                280
+              ],
+              "tangent": [
+                0,
+                0
+              ]
+            },
+            {
+              "frame": 359,
+              "value": [
+                720,
+                280
+              ],
+              "tangent": [
+                0,
+                0
+              ]
+            }
+          ]
+        },
+        "zoom": {
+          "interpolation": "hermite",
+          "keys": [
+            {
+              "frame": 216,
+              "value": 1,
+              "tangent": 0
+            },
+            {
+              "frame": 288,
+              "value": 1,
+              "tangent": 0
+            },
+            {
+              "frame": 312,
+              "value": 2,
+              "tangent": 0
+            },
+            {
+              "frame": 348,
+              "value": 7,
+              "tangent": 0
+            },
+            {
+              "frame": 359,
+              "value": 7,
+              "tangent": 0
+            }
+          ]
+        },
+        "portal_prop": "door_01"
+      },
+      "actions": [
+        {
+          "id": "trace",
+          "kind": "trace_door",
+          "range": [
+            216,
+            264
+          ],
+          "channels": [
+            "props.door_01.trace_progress",
+            "props.paper_star_01.position"
+          ],
+          "prop": "door_01"
+        },
+        {
+          "id": "open_door",
+          "kind": "open_door",
+          "range": [
+            264,
+            288
+          ],
+          "channels": [
+            "props.door_01.open_fraction"
+          ],
+          "prop": "door_01"
+        },
+        {
+          "id": "notice",
+          "kind": "look_at",
+          "range": [
+            216,
+            288
+          ],
+          "channels": [
+            "actors.courier_01.gaze_degrees",
+            "actors.courier_01.anchors.right_grip",
+            "actors.courier_01.body_turn_deg"
+          ],
+          "actor": "courier_01",
+          "prop": "door_01"
+        },
+        {
+          "id": "passage",
+          "kind": "camera_passage",
+          "range": [
+            288,
+            348
+          ],
+          "channels": [
+            "camera.center",
+            "camera.zoom"
+          ],
+          "prop": "door_01"
+        }
+      ],
+      "keyposes": [
+        {
+          "frame": 216,
+          "actor": "courier_01",
+          "asset_id": "A04"
+        },
+        {
+          "frame": 264,
+          "actor": "courier_01",
+          "asset_id": "A05"
+        },
+        {
+          "frame": 288,
+          "actor": "courier_01",
+          "asset_id": "A05"
+        },
+        {
+          "frame": 348,
+          "actor": "courier_01",
+          "asset_id": "A05"
+        }
+      ],
+      "typography": {
+        "lyric_segment_ids": [],
+        "preferred_box": [
+          65,
+          55,
+          315,
+          165
+        ],
+        "avoid": [
+          "face",
+          "door_01",
+          "paper_star_01"
+        ],
+        "status": "pending_actual_audio"
+      }
+    }
+  ],
+  "events": [
+    {
+      "id": "grip_star",
+      "kind": "attach",
+      "frame": 24,
+      "actor": "courier_01",
+      "anchor": "right_grip",
+      "prop": "paper_star_01",
+      "require_state": "pocket_hidden",
+      "state": "held_folded"
+    },
+    {
+      "id": "hand_opening",
+      "kind": "set_actor_state",
+      "frame": 114,
+      "actor": "courier_01",
+      "changes": {
+        "right_hand": "opening"
+      }
+    },
+    {
+      "id": "star_opening",
+      "kind": "set_state",
+      "frame": 114,
+      "prop": "paper_star_01",
+      "require_state": "held_folded",
+      "state": "held_opening"
+    },
+    {
+      "id": "hand_open",
+      "kind": "set_actor_state",
+      "frame": 131,
+      "actor": "courier_01",
+      "changes": {
+        "right_hand": "open"
+      }
+    },
+    {
+      "id": "release_star",
+      "kind": "detach",
+      "frame": 132,
+      "prop": "paper_star_01",
+      "require_state": "held_opening",
+      "state": "released"
+    },
+    {
+      "id": "unfolded_star",
+      "kind": "set_state",
+      "frame": 192,
+      "prop": "paper_star_01",
+      "require_state": "released",
+      "state": "floating_open"
+    },
+    {
+      "id": "door_begins",
+      "kind": "set_state",
+      "frame": 216,
+      "prop": "door_01",
+      "require_state": "absent",
+      "state": "tracing"
+    },
+    {
+      "id": "star_docks",
+      "kind": "set_state",
+      "frame": 228,
+      "prop": "paper_star_01",
+      "require_state": "floating_open",
+      "state": "door_seal"
+    },
+    {
+      "id": "door_complete",
+      "kind": "set_state",
+      "frame": 264,
+      "prop": "door_01",
+      "require_state": "tracing",
+      "state": "closed_outline"
+    },
+    {
+      "id": "door_opens",
+      "kind": "set_state",
+      "frame": 265,
+      "prop": "door_01",
+      "require_state": "closed_outline",
+      "state": "opening"
+    },
+    {
+      "id": "door_open",
+      "kind": "set_state",
+      "frame": 288,
+      "prop": "door_01",
+      "require_state": "opening",
+      "state": "open"
+    }
+  ],
+  "production_record": {
+    "candidate_budget": {
+      "master": 4,
+      "each_pose": 2,
+      "each_background": 2
+    },
+    "selected_by": {
+      "kind": "human",
+      "id": "planned_art_study_not_selected_yet"
+    },
+    "manual_edits": [],
+    "candidate_log": [],
+    "failures": []
+  },
+  "render_boundary": "This JSON samples transforms/state only. Actual rendering must reject pending/missing/unreviewed assets."
+}

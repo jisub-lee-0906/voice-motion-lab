@@ -16,12 +16,23 @@ Local MV UI :8797 → bounded job manager (one active job)
 ```
 
 The normal path accepts one audio file with no manually chosen scene sources or
-timeline cuts. Browser decoding/downmixing/resampling produces 16kHz mono PCM;
-oversized duration is rejected before upload. The backend accepts 1–60 seconds,
-with 15–45 seconds recommended for the first excerpt. Output is 960×540 at 24fps,
-CPU H.264/AAC MP4, a scene contact sheet and an editable directing JSON document.
-The audio in the video comes from the submitted resampled mono audio, so this is
-not a promise of original stereo fidelity.
+timeline cuts. Browser preflight checks duration and sends the unchanged original
+file bytes. Admission occurs before the multipart body is read. A dedicated,
+45-second-bounded decoder normalizes mono/stereo 8–96 kHz to float WAV without
+downmixing or changing sample rate. Input is 1–60 seconds and 24 MiB per request,
+with 15–45 seconds recommended. Output is 960×540 at 24fps, CPU H.264/AAC MP4,
+a scene contact sheet and an editable directing JSON. Final AAC is reencoded
+at 48 kHz stereo; this is not a lossless original-audio copy.
+
+## Active quality redesign
+
+The next art gate is one original adult courier and one paper star in three shots
+over 15 seconds: extract, release, trace a door and pass through. Numeric scene
+planning and the isolated FLUX.2 klein benchmark sources are implemented; art,
+usable layers and animation have not passed review. See [art bible](MV_ART_BIBLE.md),
+[reference observations](MV_REFERENCE_ANALYSIS.md), [quality gate](MV_QUALITY_GATE.md)
+and [renderer plan](MV_RENDER_PLAN.md). Human-directed art research must remain
+separate from the later three-song audio-only automation evaluation.
 
 The SDK graph performs the creative work: actual audio feature analysis, lyric
 symbol/repetition rules, shot planning, authored 2D art and final rendering. It is

@@ -1,0 +1,60 @@
+{
+  "format": "voice-motion-quality-benchmark",
+  "version": 1,
+  "state": "prepared; no GPU execution performed",
+  "model": "FLUX.2-klein-4b-fp8",
+  "hero_candidates": [
+    {
+      "id": "hero_seed_7",
+      "workflow": "mv-quality-t2i.api.json",
+      "noise_node": "6",
+      "seed": 7,
+      "prefix_node": "13",
+      "filename_prefix": "benchmark/hero_seed_7"
+    },
+    {
+      "id": "hero_seed_19",
+      "workflow": "mv-quality-t2i.api.json",
+      "noise_node": "6",
+      "seed": 19,
+      "prefix_node": "13",
+      "filename_prefix": "benchmark/hero_seed_19"
+    }
+  ],
+  "max_hero_candidates": 2,
+  "automatic_retries": 0,
+  "selection": "Review the two actual generated illustrations before choosing the canonical reference for this benchmark. Final product automatic selection remains unvalidated.",
+  "edit": {
+    "workflow": "mv-quality-edit.api.json",
+    "reference_file": "hero-reference.png",
+    "seed": 7,
+    "max_shots": 3,
+    "shots": [
+      {
+        "id": "S01_extract",
+        "prompt": "Use the supplied image as the exact character reference: preserve the same adult face, body proportions and outfit of one adult courier with a short asymmetrical black bob, a small ivory crescent pin at the left temple, a muted coral raincoat with one large patch pocket, navy trousers and navy boots. Exactly one ivory paper star, the same object throughout the story. S01: three-quarter wide full-body shot. One hand is at the large raincoat pocket, extracting the folded ivory paper star, with clear finger-to-star contact. Show face, pocket and hand together; star just emerging from the pocket. Quiet ink-navy night background, dark foreground silhouette, ample empty space along the star's future path. Hand-drawn controlled ink contours, refined flat cel shading, subtle print grain, strong cinematic light-and-shadow shapes, dimensional staging through foreground and background silhouettes, original animated-film still quality. Restrained ink navy, muted coral, ivory and cool blue-gray palette. Adult proportions and expressive believable hands; no kawaii icon, paper puppet, simple vector sticker, photorealism or 3D doll. No letters, logos or watermark."
+      },
+      {
+        "id": "S02_release",
+        "prompt": "Use the supplied image as the exact character reference: preserve the same adult face, body proportions and outfit of one adult courier with a short asymmetrical black bob, a small ivory crescent pin at the left temple, a muted coral raincoat with one large patch pocket, navy trousers and navy boots. Exactly one ivory paper star, the same object throughout the story. S02: cinematic close-up of the same hand and coral raincoat sleeve, with part of the same coat and pocket visible to establish identity. The fingers open their grip and release the single folded ivory paper star: show a small legible gap between the open fingertips and the star just beginning to rise. Preserve the star's crease design and scale relative to the hand. Clear contact-to-separation staging and simple ink-navy background. Hand-drawn controlled ink contours, refined flat cel shading, subtle print grain, strong cinematic light-and-shadow shapes, dimensional staging through foreground and background silhouettes, original animated-film still quality. Restrained ink navy, muted coral, ivory and cool blue-gray palette. Adult proportions and expressive believable hands; no kawaii icon, paper puppet, simple vector sticker, photorealism or 3D doll. No letters, logos or watermark."
+      },
+      {
+        "id": "S03_door",
+        "prompt": "Use the supplied image as the exact character reference: preserve the same adult face, body proportions and outfit of one adult courier with a short asymmetrical black bob, a small ivory crescent pin at the left temple, a muted coral raincoat with one large patch pocket, navy trousers and navy boots. Exactly one ivory paper star, the same object throughout the story. S03: wide cinematic shot of the same courier turning their gaze and shoulders toward a luminous ivory doorway in the ink-navy night space. The single paper star is at the top of the doorway; a continuous ivory paper strip unfurling from that star traces the door outline. Make the star-to-door connection unmistakable, with the bright ivory interior visibly distinct from the dark space. The courier, star and door share one coherent scene. Hand-drawn controlled ink contours, refined flat cel shading, subtle print grain, strong cinematic light-and-shadow shapes, dimensional staging through foreground and background silhouettes, original animated-film still quality. Restrained ink navy, muted coral, ivory and cool blue-gray palette. Adult proportions and expressive believable hands; no kawaii icon, paper puppet, simple vector sticker, photorealism or 3D doll. No letters, logos or watermark."
+      }
+    ]
+  },
+  "resource_gate": {
+    "explicit_approval": true,
+    "min_free_vram_gib": 12,
+    "min_free_ram_gib": 16,
+    "other_compute_processes": 0,
+    "existing_processes_may_be_stopped": false
+  },
+  "outputs": {
+    "root": "output/mv-quality",
+    "originals": "Retain original PNG, prompt, seed, actual API graph, actual native Comfy history, model hashes and elapsed time. Resource snapshots are recorded; peak VRAM/RAM remain unmeasured.",
+    "asset_pack": "Three shot masters are a quality gate. Automatic RGBA layers, pose animation and final MV quality remain unvalidated."
+  },
+  "art_bible": "docs/MV_ART_BIBLE.md"
+}

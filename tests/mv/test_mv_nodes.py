@@ -119,6 +119,16 @@ class MVNodeTests(unittest.TestCase):
             self.package.VoiceMotionMVCreate.execute(self.job_id, json.dumps(self.transcript), "auto", 7)
         engine.assert_not_called()
 
+    def test_canonical_wave_size_bound_matches_sdk(self):
+        for size, accepted in ((33*1024*1024, True), (64*1024*1024, True), (64*1024*1024+1, False)):
+            with self.audio.open('wb') as source:
+                source.truncate(size)
+            if accepted:
+                self.assertEqual(self.nodes._job_paths(self.job_id)[0], self.audio)
+            else:
+                with self.assertRaisesRegex(ValueError, '64 MiB'):
+                    self.nodes._job_paths(self.job_id)
+
     def test_api_gui_and_schema_use_the_same_fields_and_widgets(self):
         api = json.loads((ROOT / "workflows" / "mv-create.api.json").read_text())
         gui = json.loads((ROOT / "workflows" / "mv-create.gui.json").read_text())

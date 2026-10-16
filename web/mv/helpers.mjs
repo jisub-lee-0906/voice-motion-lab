@@ -1,5 +1,6 @@
 export const MAX_SECONDS = 60;
-export const SAMPLE_RATE = 16000;
+export const MAX_UPLOAD_BYTES = 24 * 1024 * 1024;
+export const MULTIPART_RESERVE_BYTES = 64 * 1024;
 export const THEMES = new Set(['auto', 'bloom', 'fracture', 'orbit']);
 export const JOB_ID = /^[a-zA-Z0-9_-]{1,80}$/;
 
@@ -9,31 +10,74 @@ export function formatTime(seconds) {
 }
 
 export function validateDuration(duration, maxSeconds = MAX_SECONDS) {
-  if (!Number.isFinite(duration) || duration <= 0) throw new Error('재생할 수 있는 음악 파일을 선택해 주세요.');
+  if (!Number.isFinite(duration) || duration < 1) throw new Error('1초 이상의 재생 가능한 음악 파일을 선택해 주세요.');
   if (duration > maxSeconds + 0.001) {
     throw new Error(`음악은 ${maxSeconds}초까지 만들 수 있어요. 15–45초 정도의 구간을 잘라 다시 선택해 주세요. 선택한 음악: ${formatTime(duration)}`);
   }
 }
 
-export function downmix(channels) {
-  if (!Array.isArray(channels) || channels.length === 0 || channels.length > 32) throw new Error('오디오 채널을 읽을 수 없어요.');
-  const length = channels[0].length;
-  if (!length || channels.some(channel => channel.length !== length)) throw new Error('오디오 채널 길이가 올바르지 않아요.');
-  const result = new Float32Array(length);
-  for (const channel of channels) {
-    for (let index = 0; index < length; index += 1) {
-      const sample = channel[index];
-      if (!Number.isFinite(sample)) throw new Error('음악 파일에 올바르지 않은 소리 값이 있어요.');
-      result[index] += sample / channels.length;
+export function maxAudioFileBytes(maxBodyBytes = MAX_UPLOAD_BYTES) {
+  const limit = Number.isFinite(maxBodyBytes) && maxBodyBytes > 0 ? Math.min(maxBodyBytes, MAX_UPLOAD_BYTES) : MAX_UPLOAD_BYTES;
+  return Math.max(0, Math.floor(limit) - MULTIPART_RESERVE_BYTES);
+}
+
+export function validateAudioFile(file, maxBodyBytes = MAX_UPLOAD_BYTES) {
+  const limit = maxAudioFileBytes(maxBodyBytes);
+  if (!Number.isSafeInteger(file?.size) || file.size <= 0 || file.size > limit) {
+    throw new Error(`비어 있지 않은 ${(limit / (1024 * 1024)).toFixed(1)}MB 이하 음악을 선택해 주세요. 15–45초 구간을 권장합니다.`);
+  }
+}
+
+export function inspectDecodedAudio(audio, maxSeconds = MAX_SECONDS) {
+  validateDuration(audio?.duration, maxSeconds);
+  const rate = audio.sampleRate;
+  const channels = audio.numberOfChannels;
+  const length = audio.length;
+  if (!Number.isFinite(rate) || rate < 8000 || rate > 96000 || !Number.isInteger(channels) || ![1,2].includes(channels)) {
+    throw new Error('음악은 8–96kHz 모노 또는 스테레오여야 합니다.');
+  }
+  if (!Number.isSafeInteger(length) || length <= 0 || Math.abs(length/rate-audio.duration) > .05) {
+    throw new Error('음악의 샘플 형식이나 채널 길이를 읽을 수 없어요.');
+  }
+  let squareSum = 0;
+  let peak = 0;
+  // Inspect each channel in place. Never mix, resample, copy or replace the upload.
+  for (let channel = 0; channel < channels; channel += 1) {
+    const samples = audio.getChannelData(channel);
+    if (samples.length !== length) throw new Error('음악 채널 길이가 올바르지 않아요.');
+    for (let index = 0; index < samples.length; index += 1) {
+      const sample = samples[index];
+      if (!Number.isFinite(sample) || Math.abs(sample) > 16) throw new Error('음악 파일에 올바르지 않은 소리 값이 있어요.');
+      squareSum += sample * sample;
+      peak = Math.max(peak, Math.abs(sample));
     }
   }
-  for (let index = 0; index < length; index += 1) result[index] = Math.max(-1, Math.min(1, result[index]));
+  const rms = Math.sqrt(squareSum / (length * channels));
+  if (rms < .0008) throw new Error('소리가 거의 없는 파일이에요. 보컬이나 음악이 들리는 구간을 선택해 주세요.');
+  return {duration:audio.duration, sample_rate:rate, channels, rms, peak};
+}
+
+export function uploadMetadata(value) {
+  const title = typeof value?.title === 'string' ? value.title.trim() : '';
+  const theme = value?.theme ?? 'auto';
+  const seed = value?.seed ?? 7;
+  const lyrics = value?.lyrics ?? '';
+  if (!title || title.length > 100 || /[\u0000-\u001f]/.test(title)) throw new Error('작품 이름은 제어 문자 없이 1–100자로 입력해 주세요.');
+  if (!THEMES.has(theme)) throw new Error('장면 테마를 다시 선택해 주세요.');
+  if (!Number.isInteger(seed) || seed < 0 || seed > 2147483647) throw new Error('시드가 올바르지 않아요.');
+  if (typeof lyrics !== 'string' || lyrics.length > 6000 || lyrics.includes('\0')) throw new Error('선택 가사는 최대 6,000자로 입력해 주세요.');
+  const result = {title, theme, seed};
+  if (lyrics.trim()) result.lyrics = lyrics.trim();
   return result;
 }
 
-export function validateSamples(samples, sampleRate = SAMPLE_RATE) {
-  if (sampleRate !== SAMPLE_RATE || !samples?.length || samples.length > MAX_SECONDS * SAMPLE_RATE) throw new Error('음악 길이 또는 샘플 형식이 올바르지 않아요.');
-  for (const sample of samples) if (!Number.isFinite(sample) || sample < -1 || sample > 1) throw new Error('음악 데이터가 올바르지 않아요.');
+export function createUploadBody(file, metadata, maxBodyBytes = MAX_UPLOAD_BYTES) {
+  validateAudioFile(file, maxBodyBytes);
+  const body = new FormData();
+  body.append('metadata', JSON.stringify(uploadMetadata(metadata)));
+  // Preserve original bytes/type. Never send a user-controlled filesystem name.
+  body.append('audio', file, 'source-audio');
+  return body;
 }
 
 export function artifactUrl(value, id, kind, origin) {

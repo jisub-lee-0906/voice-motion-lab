@@ -1,6 +1,7 @@
 .venv/
 .comfy-venv/
 .mv-venv/
+.gpu-venv/
 .cache/
 .runtime/
 models/*

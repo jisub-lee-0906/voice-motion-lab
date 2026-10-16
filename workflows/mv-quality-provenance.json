@@ -1,0 +1,39 @@
+{
+  "format": "voice-motion-quality-workflows",
+  "version": 1,
+  "gpu_tested": false,
+  "adaptation": "Flattened core-only API and GUI graphs. Removed demonstration inputs and base branch; fixed FP8 distilled weights, Euler, 4 steps, CFG 1, batch 1, and original character prompts. Single canonical image reference is appended to positive and negative conditioning for edits.",
+  "source": {
+    "repo": "Comfy-Org/workflow_templates",
+    "revision": "04a508b31bec1818e48122ca0761c1de4140a234",
+    "license": "MIT",
+    "license_file": "mv-quality-upstream.LICENSE",
+    "files": [
+      {
+        "file": "templates/image_flux2_klein_text_to_image.json",
+        "sha256": "cd4a29b0be6f71a7391f2f023e69dfc3b47d7da9f2aa215b4c8b8e17c2eea107"
+      },
+      {
+        "file": "templates/image_flux2_klein_image_edit_4b_distilled.json",
+        "sha256": "7f1ead62d1456d485e95fb432fb492d2783f5ec9cfeefefe4ef71bfb448ba1a3"
+      }
+    ]
+  },
+  "hardware_sources": [
+    "https://developer.nvidia.com/cuda/gpus",
+    "https://pytorch.org/blog/pytorch-2-7/",
+    "https://pytorch.org/get-started/previous-versions/",
+    "https://download.pytorch.org/whl/cu130/torch/",
+    "https://download.pytorch.org/whl/cu130/torchvision/"
+  ],
+  "planned_runtime": {
+    "python": "3.12 x64",
+    "torch": "2.14.1+cu130",
+    "torchvision": "0.29.1+cu130",
+    "comfy_revision": "bdc63e72f5ab29fde448c161db3057827148c0ef",
+    "status": "Official wheels and source requirements checked; package resolution and GPU kernels have not been executed or validated.",
+    "minimum_free_vram_gib": 12,
+    "minimum_free_ram_gib": 16,
+    "explicit_resource_approval_required": true
+  }
+}

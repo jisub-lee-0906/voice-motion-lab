@@ -44,8 +44,8 @@ def _job_paths(job_id):
         raise ValueError("The MV audio must stay inside this project's input job directory.")
     if approved_output.resolve(strict=True) != approved_output or not approved_output.is_dir():
         raise ValueError("The MV result must stay inside this project's output job directory.")
-    if approved_audio.stat().st_size > 32 * 1024 * 1024:
-        raise ValueError("MV input exceeds 32 MiB.")
+    if approved_audio.stat().st_size > 64 * 1024 * 1024:
+        raise ValueError("MV input exceeds 64 MiB.")
     # /view, used by the official proxy for real bytes, must serve this checkout.
     import folder_paths
     if Path(folder_paths.get_output_directory()).resolve() != PROJECT_ROOT / "output":

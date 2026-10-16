@@ -1,4 +1,49 @@
-# v0.3 로컬 MV 제작기 검증 — 2026-10-17
+# v0.3 품질 재설계 준비·원본 음원 보존 — 2026-10-17
+
+새 15초 작품의 완성 기록이 아니다. 새 원화·레이어·애니메이션과 자연 가창
+품질은 아직 검증하지 않았다. 아래 기술 검사는 기존 절차적 미술 경로를 사용했다.
+
+- 최종 회귀: Python 기본 32개 + MV 108개 + Node 68개 = **208개 통과**.
+  별도 PowerShell 프로세스 소유권 순수 검사 18개와 준비 스크립트 구문 검사도 통과했다.
+
+- 공식 MV 일부 구간을 실제 재생해 구도·포즈·전경·색을 관찰했다.
+  [관찰 기록](docs/MV_REFERENCE_ANALYSIS.md)은 확인 시점과 해석을 구분한다.
+- [미술 기준](docs/MV_ART_BIBLE.md), [품질 기준](docs/MV_QUALITY_GATE.md),
+  [장면 계약](docs/MV_SHOT_CONTRACT.md), [렌더러 설계](docs/MV_RENDER_PLAN.md)를 작성했다.
+  장면의 손·별 부착과 분리, 문 생성, 카메라 통과를 수치 검증·샘플링하는 코드를
+  구현했다. 자산·음원은 pending이며 출력은 rendered=false다.
+- 독립 `.gpu-venv`·Comfy 8796·SDK 프록시 8798의 준비 소스와 공식 템플릿 기반
+  API/GUI 그래프를 작성했다. 두 원화 후보(seed 7·19)와 세 참조 편집의 예산,
+  실제 파일·프롬프트·모델 해시·실패 기록을 남기는 runner를 구현했다.
+  구조·전송 테스트는 모의 전송이다. 교차 검토에서 발견한 그래프 우회·SDK 429
+  재시도·다운로드 후 크기 검사 문제를 수정하고 회귀 검사했다. GPU 설치·모델
+  다운로드·추론은 하지 않았다.
+- 정상 UI가 원본 파일 바이트를 multipart로 전달하도록 변경했다. 로컬 전용
+  정규화 child는 원래 rate·mono/stereo를 유지하며, 45초 시간 제한에 걸리면 그
+  Popen 프로세스만 kill/wait한다. 본문 수신 전 단일 작업권, MIME 구조 한도,
+  파싱 실패의 권한 반환, 실제 timeout child 종료·회수도 검사했다.
+- 실제 UI 작업 `4bd59ac144994ec3a02dfb0ff40a38e1`: 자체 합성 음악·Microsoft Zira
+  TTS에서 만든 8초 48kHz 스테레오 QA 입력. 자연 가창이 아니다. 좌/우에 각각
+  11/13kHz 검증음을 추가했다. 가사 입력 없이 실제 Qwen ASR·정렬·SDK 렌더를
+  거쳐 8초·3컷 MP4/WebM을 생성했다. 서버 작업 시간은 35.384초의 한 번 관측이다.
+- 선택 파일과 보존된 upload.audio의 SHA256이 같고, 정규화 float WAV는 원본
+  PCM을 디코딩한 두 채널과 샘플 단위로 정확히 같았다. 최종 AAC는 48kHz 스테레오,
+  채널별 상관 0.999895/0.999952, 상대 시차 각 0샘플, 11/13kHz 표지 보존을 확인했다.
+  AAC 재인코딩 결과를 무손실이라고 부르거나 이 QA를 모든 음악의 청감 평가로 일반화하지 않는다.
+- 실제 브라우저에서 WebM의 currentTime=5.543561, duration=8.008, readyState=4,
+  error=null을 확인했다. UI에서 내려받은 MP4의 SHA256은 마스터와 같은
+  `f5de093e0d8e25236bf6cfa16487097eda4bc8f1aed86f26ac0e8be91a35d4ce`다.
+- 소유 스크립트·PID 생성 시각·빈 큐를 검증한 이 프로젝트 8794/8795/8797만
+  재시작해 새 경로를 시험했다. 기본 8793 앱과 기존 Studio는 중단·재시작·변경하지 않았다.
+  공유 GPU가 사용 중이어서 CUDA 설치나 추론을 실행하지 않았다.
+
+근거는 비공개 `output/mv-verification/stereo-roundtrip.json`, `stereo-browser.json`,
+`stereo-upload-ui.png`와 해당 작업 디렉터리에 보존한다. 원음·결과·장치 정보는 Git에 넣지 않는다.
+새 원화가 실제 미술 검토를 통과하기 전까지 이 준비를 완성 MV라고 소개하지 않는다.
+
+---
+
+# v0.3 로컬 MV 제작기 초기 검증 — 2026-10-17 (이전 빌드 기록)
 
 독립 프로젝트의 UI → 실제 Qwen3 ASR/ForcedAligner CPU → 공식 comfy-sdk 0.5.0
 → 프로젝트 API v2 proxy 0.1.6 → 독립 ComfyUI의 VoiceMotionMVCreate → 실제

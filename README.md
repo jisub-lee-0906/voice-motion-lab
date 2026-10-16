@@ -26,6 +26,17 @@ WebM 미리보기까지 포함한 재검증은 약 49초였고 실제 브라우�
 새로고침과 앱 재시작 후 결과 복구를 확인했습니다. 자동 테스트 147개를 통과했습니다.
 선택형 CPU OpenVINO 원화 실험은 미술 품질이 부족해 기본 경로에 채택하지 않았습니다.
 
+다음 단계는 **종이별을 꺼내 놓으면 문이 생기는 15초·3컷**의 미술·동작 시험입니다.
+실제 레퍼런스 표본을 조사하고 수치 장면 계약·검증 코드와 FLUX.2 klein 원화 시험용
+독립 GPU 실행 소스를 준비했습니다. **새 원화·완성 영상의 품질 검증은 아직입니다.**
+기존 GPU 작업을 임의로 중단하지 않으며 자원 양도 승인 후 별도 환경에서 시험합니다.
+[미술 기준](docs/MV_ART_BIBLE.md) · [품질 기준](docs/MV_QUALITY_GATE.md) ·
+[준비된 벤치마크](workflows/mv-quality-README.md).
+
+MV 업로드는 원본 파일 바이트를 로컬로 전달하고 8–96kHz 모노·스테레오를
+변환 없이 float WAV로 보존하도록 개선했습니다. 최종 MP4의 AAC는 48kHz 스테레오로
+재인코딩합니다. 작업권을 본문 수신 전에 확보하고 정규화 프로세스에 45초 제한을 둡니다.
+
 설치·개인정보·모델 출처·한계는 [MV 제작기 안내](docs/MV_CREATOR.md),
 구현 상태와 제출 전 할 일은 [제작 계획](docs/PRODUCTION_PLAN.md)을 확인하세요.
 기존 ComfyUI Studio와 환경은 변경하거나 사용하지 않습니다.
@@ -138,10 +149,13 @@ v0.3 MV 제작기는 별도 :8797 경로에서 공식 Comfy SDK/API v2를 사용
 
 이 프로젝트는 기존 ComfyUI/Studio와 별도입니다. 기존 설치, `.venv`,
 `custom_nodes`, 워크플로우, 공유 모델, 설정과 서버를 변경하거나 이용하지 않습니다.
-Python 설치는 프로젝트 `.venv`, `.mv-venv`, `.comfy-venv`에만 합니다. 정리는 직접
+Python 설치는 프로젝트 `.venv`, `.mv-venv`, `.comfy-venv`, 준비된 `.gpu-venv`에만 합니다. 정리는 직접
 만든 파일과 프로세스에만 한정합니다. 더 무거운 실행 전에는 공유 자원을 점검합니다.
 
 ```powershell
+$env:PYTHONPATH = Join-Path (Get-Location) 'src'
+$env:TEMP = Join-Path (Get-Location) 'temp'
+$env:TMP = $env:TEMP
 ./.venv/Scripts/python.exe -m unittest discover -s tests -p 'test_*.py' -v
 ./.mv-venv/Scripts/python.exe -m unittest discover -s tests/mv -p 'test_*.py' -v
 node --test (Get-ChildItem tests -Recurse -Filter '*.test.mjs').FullName

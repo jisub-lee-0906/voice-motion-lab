@@ -1,0 +1,9 @@
+# Official Windows cp312 CUDA 13.0 wheels, isolated .gpu-venv only.
+torch==2.14.1+cu130
+torchvision==0.29.1+cu130
+transformers==5.20.0
+numpy==2.5.4
+Pillow==12.3.0
+av==19.0.1
+comfy-kitchen==0.2.37
+comfy-aimdo==0.5.6

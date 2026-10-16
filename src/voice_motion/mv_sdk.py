@@ -57,8 +57,8 @@ def validate_job_paths(audio_path: Path, output_dir: Path) -> tuple[Path, Path, 
         raise ValueError("MV output must be this project's corresponding job directory.")
     if audio != approved_audio or not audio.is_file():
         raise ValueError("MV input must be this project's corresponding source.wav.")
-    if audio.stat().st_size > 32 * 1024 * 1024:
-        raise ValueError("MV source.wav exceeds the local 32 MiB limit.")
+    if audio.stat().st_size > 64 * 1024 * 1024:
+        raise ValueError("MV source.wav exceeds the local 64 MiB limit.")
     return audio, output, job_id
 
 

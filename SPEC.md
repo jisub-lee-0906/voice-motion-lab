@@ -1,5 +1,11 @@
 # Voice Motion Lab v0.1 contract
 
+This document preserves the basic v0.1 editor contract. Active contest MV work
+uses [docs/MV_CONTRACT.md](docs/MV_CONTRACT.md) and the subsequent
+[quality gate](docs/MV_QUALITY_GATE.md), [art bible](docs/MV_ART_BIBLE.md) and
+[shot contract](docs/MV_SHOT_CONTRACT.md). The original Studio isolation rules
+still apply to every version.
+
 Goal: upload original SVG, record/import a five-second voice performance, analyze timing/pitch/impacts locally, preview a deterministic editable animation and export project JSON, animated SVG, and video.
 
 No semantic promise that arbitrary sounds are understood. Sustained voice advances a chosen motion path, silence holds progress, attack peaks add impact/squash, and voiced pitch adds vertical expression. Signal analysis is a real non-model fallback; Basic Pitch ONNX on CPU is the open-model engine. Models load sequentially; no GPU.
