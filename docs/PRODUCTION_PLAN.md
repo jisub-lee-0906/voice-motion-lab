@@ -1,4 +1,116 @@
-# BOP! v0.2 — current implementation and submission work
+# BOP! MV v0.3 — contest-first implementation and remaining work
+
+The current contest direction is a local song-to-lyric-driven 2D music-video
+creator. The user relaxed the browser-only and server-free constraints for this
+advanced path; isolation from the user's existing ComfyUI Studio remains mandatory.
+The published five-second BOP! v0.2 app stays available as a separate browser product.
+
+## Current implemented path
+
+```text
+Local MV UI :8797 → bounded job manager (one active job)
+  → project CPU Qwen3 ASR → Qwen3 ForcedAligner
+  → official comfy-sdk 0.5.0 → project API v2 proxy 0.1.6 :8795
+  → independent ComfyUI :8794 → VoiceMotionMVCreate
+  → actual MP4 / editable project JSON / storyboard artifacts
+```
+
+The normal path accepts one audio file with no manually chosen scene sources or
+timeline cuts. Browser decoding/downmixing/resampling produces 16kHz mono PCM;
+oversized duration is rejected before upload. The backend accepts 1–60 seconds,
+with 15–45 seconds recommended for the first excerpt. Output is 960×540 at 24fps,
+CPU H.264/AAC MP4, a scene contact sheet and an editable directing JSON document.
+The audio in the video comes from the submitted resampled mono audio, so this is
+not a promise of original stereo fidelity.
+
+The SDK graph performs the creative work: actual audio feature analysis, lyric
+symbol/repetition rules, shot planning, authored 2D art and final rendering. It is
+not an unused workflow or decorative SDK call. File results must be retrieved as
+real bytes through the official API v2 path. No direct-engine fallback or cloud
+endpoint is silently substituted. The UI polls actual stage/progress and displays
+real failures. It does not pretend to cancel an SDK job that it cannot safely cancel.
+
+The dedicated `.mv-venv` contains server/SDK/proxy dependencies. The project's own
+`.comfy-venv` runs ASR/alignment in a subprocess and the independent CPU Comfy runtime.
+Pinned Qwen ASR and alignment weights total about 3.4GB and live only under
+`.runtime/mv-models`. CPU work uses two threads, models load sequentially, and
+Windows job admission checks at least 5GB available RAM. No existing GPU work is
+unloaded or interrupted. Setup/start instructions and exact model revisions are
+in [MV_CREATOR.md](MV_CREATOR.md).
+
+## What is still a draft
+
+The current art is original, directly authored procedural 2D illustration with
+recurring character/motif state, poses, compositions, transitions and lyric text.
+It proves the automatic directing/rendering boundary; it is not image-model art
+or a claim to the polish of the reference music videos. Theme semantics currently
+use a Korean/English lexicon rather than a general lyric-understanding model.
+Measured spectral onsets/energy inform timing; exact downbeats are not guaranteed.
+
+Two actual CPU OpenVINO LCM illustration trials failed the intended flat-art
+direction and were not adopted. This optional experiment is separate from the
+default MV pipeline. Future artwork packs must preserve identity, layer consistency,
+provenance and animation usability before they can replace the current renderer.
+
+The explicit 32-second demo is original procedural music mixed with Microsoft
+Zira synthetic spoken TTS. It is **not natural singing or a human recording**.
+The default demo request still runs real ASR/alignment; expected fixture lyrics
+are not prefilled into the production request. Natural Korean singing, strong
+accompaniment, multiple singers and diverse song structures remain quality tests.
+
+## Live verification status
+
+Code implementation and tests must be distinguished from whole-product evidence.
+The initial SDK result-metadata failure has been repaired. An actual UI run now
+completed a 32-second synthetic fixture through real CPU ASR/alignment and the
+official SDK graph, producing 13 shots in about 46 seconds on this PC. Including
+the derived WebM preview, the final repeated UI run took about 49 seconds. These
+are observed fixture timings, not general performance promises. Independent decoded
+MP4 inspection confirmed 768 H.264 frames at 960×540/24fps, 32 seconds of AAC audio,
+source correlation 0.99999464 and zero measured audio lag, continuous shot coverage
+and no absolute host paths in the directing JSON. Actual WebM browser playback
+advanced to 8.09 seconds with readyState 4. Browser-downloaded MP4 SHA-256 matched
+the rendered master. A numeric-extension routing error was fixed; H.264 codec
+support was not the established cause of that earlier playback failure. Completed
+results survive refresh and app restart. Python 82 + Node 65 = 147 tests passed.
+Current evidence is recorded separately by version in `VERIFICATION.md`.
+
+User input and outputs stay in ignored project-owned `input/mv/<job-id>` and
+`output/mv/<job-id>` directories. They are not uploaded to GitHub or external
+inference services. Model/cache/temp/proxy state also remain in this checkout.
+No automatic retention cleanup is currently implemented. JSON includes lyrics
+and MP4 includes audio; users should inspect a file before sharing it.
+
+## Before a final contest submission
+
+1. Preserve the verified local UI → CPU ASR/alignment → SDK graph → actual files
+   flow. Add fresh-install and physical-device checks before distributing a runtime.
+2. Test several authorized excerpts with natural singing, particularly Korean;
+   assess lyric accuracy, word timing, scene variation and character consistency.
+3. Improve artwork and visual direction toward a useful original MV product.
+   Any generated-illustration option must pass identity/layer/quality checks and
+   keep model/version/license/engine metadata explicit.
+4. Recheck the [competition](https://comfy.org/open-source-higgsfield) requirements
+   against the actual build. Official SDK use is implemented but neither that
+   fact nor this plan alone guarantees eligibility.
+5. Prepare the two-minute demonstration and representative outputs, source,
+   workflows, licenses and required submission details. Required SNS publication
+   and final submission have **not** been performed. The user deferred final
+   submission until production readiness; do not submit automatically.
+
+The original ComfyUI Studio, shared models, workflows, environments and servers
+remain untouched. This local MV creator is not deployed to GitHub Pages. The
+[public BOP! v0.2 URL](https://jisub-lee-0906.github.io/voice-motion-lab/) continues
+to serve only its browser-native five-second experience.
+
+---
+
+# Historical record: BOP! v0.2 implementation and submission plan
+
+The following is the earlier v0.2 plan and its verification evidence. Statements
+such as “pending”, “not installed” and “integration in progress” describe that
+earlier stage, not the current v0.3 implementation. Keep these test figures scoped
+to v0.2; they do not establish MV creator quality or contest eligibility.
 
 ## Implemented product
 

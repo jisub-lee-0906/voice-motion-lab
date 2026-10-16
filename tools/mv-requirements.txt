@@ -1,0 +1,6 @@
+# Install only in this checkout's .mv-venv. CPU ASR uses separate .comfy-venv.
+comfy-sdk==0.5.0
+comfy-api-proxy==0.1.6
+numpy==2.5.4
+pillow==12.3.0
+av==19.0.1

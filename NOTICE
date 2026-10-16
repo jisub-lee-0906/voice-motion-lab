@@ -39,3 +39,68 @@ ignored web/play/vendor/. Exact integrity, bytes and SHA-256 hashes are in
 web/play/vendor/export-runtime.json. They are included in a static build with
 their licenses. These upstream packages are deprecated in favor of Mediabunny;
 this app uses the pinned container muxers only and does not bundle Mediabunny.
+
+The optional v0.3 MV creator uses Qwen open-weight speech recognition and
+word alignment, Copyright 2026 Alibaba Cloud, Apache License 2.0:
+
+- Qwen/Qwen3-ASR-0.6B-hf
+  https://huggingface.co/Qwen/Qwen3-ASR-0.6B-hf
+  Pinned revision: 7f1569a48a89f3e3f4dc3a5c9d28bddd903bc76c
+- Qwen/Qwen3-ForcedAligner-0.6B-hf
+  https://huggingface.co/Qwen/Qwen3-ForcedAligner-0.6B-hf
+  Pinned revision: c07281df297b9905d24a508279258cccf987a064
+
+These pinned model cards explicitly declare Apache-2.0 but do not include a
+LICENSE sibling. tools/setup_mv_models.py preserves the unmodified original
+Apache-2.0 LICENSE from the official QwenLM/Qwen3-ASR project beside each model.
+License source revision: 7c6daf77a2421100f5fb066495372c00129d39ff
+https://github.com/QwenLM/Qwen3-ASR/blob/7c6daf77a2421100f5fb066495372c00129d39ff/LICENSE
+Its SHA-256 and separate provenance are saved in each model's manifest.json.
+All model assets and licenses remain in ignored .runtime/mv-models/; weights are
+not committed, modified, or included in the public static BOP app.
+
+The MV integration uses the official Comfy Python SDK 0.5.0 and local
+comfy-api-proxy 0.1.6, both MIT, Comfy-Org / upstream contributors.
+https://github.com/Comfy-Org/comfy-python-sdk
+https://github.com/Comfy-Org/comfy-api-proxy
+Their original licenses are preserved in their installed project-only package
+distributions. tools/setup_mv_sdk.py records exact official wheel URLs and hashes.
+
+The local CPU MV runtime uses separately installed NumPy (BSD-3-Clause),
+Pillow (MIT-CMU/HPND), and PyAV (BSD-3-Clause). PyAV's binary distribution also
+contains FFmpeg components and codec libraries under their respective licenses;
+the app does not vendor or relicense those binaries. See the installed package
+license files and upstream PyAV binary-build license notices before redistributing
+a bundled runtime. The repository contains source and install instructions only.
+https://github.com/numpy/numpy
+https://github.com/python-pillow/Pillow
+https://github.com/PyAV-Org/PyAV
+
+The CPU ASR worker separately installs PyTorch and Transformers. Transformers
+5.20.0 is Apache-2.0; PyTorch includes its upstream license and bundled third-party
+license notices in its installed distribution. These packages are not vendored.
+https://github.com/huggingface/transformers
+https://github.com/pytorch/pytorch
+
+Korean word alignment additionally uses soynlp 0.0.493, Copyright 2019 lovit.
+Its package classifier says GPLv3; the original upstream LICENSE contains
+LGPL-3.0 terms. Preserve and review the upstream license when packaging a runtime;
+the project's setup installs the package separately and does not vendor it.
+https://github.com/lovit/soynlp/blob/master/LICENSE
+
+Windows Korean fonts, when available, are used through read-only local paths.
+No proprietary font file is copied into the source repository or static site.
+The MV character, scenery, animation rules and synthetic demo composition are
+original authored project assets. They do not redistribute reference music,
+lyrics, artwork, or characters from the inspiration videos.
+
+An optional illustration experiment is separate from the default MV creator:
+OpenVINO/LCM_Dreamshaper_v7-int8-ov at revision
+340a03e5488f36f7f222e6efa29819850ad7e4be, with an official CLIP tokenizer.
+The converted LCM metadata says MIT, but the DreamShaper/Stable Diffusion base
+inherits CreativeML OpenRAIL-M terms; it must not be presented as MIT-only.
+tools/setup_mv_illustration.py preserves the base-model, LCM/CLIP and Apache-2.0
+Diffusers scheduler notices/licenses beside the optional model. OpenVINO and
+tokenizers are separately installed optional packages. No optional model weights
+or generated illustration are committed or included in the default pipeline.
+https://huggingface.co/OpenVINO/LCM_Dreamshaper_v7-int8-ov

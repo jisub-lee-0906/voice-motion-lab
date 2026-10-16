@@ -1,0 +1,3 @@
+# Optional experiment only. Install in .mv-venv, never system/Studio Python.
+openvino==2026.4.1
+tokenizers==0.23.3

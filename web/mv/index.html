@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f1e8">
+  <meta name="description" content="음악과 가사로 만드는 나만의 2D 모션그래픽 뮤직비디오. BOP! MV 로컬 제작 스튜디오.">
+  <title>BOP! MV — 음악이 세계가 되는 순간</title>
+  <link rel="stylesheet" href="./style.css">
+  <script type="module" src="./app.mjs"></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="./" aria-label="BOP! MV 시작 화면"><span class="brand-symbol" aria-hidden="true">b</span><span>BOP! <em>MV</em></span></a>
+    <nav aria-label="서비스"><a class="basic-link" href="https://jisub-lee-0906.github.io/voice-motion-lab/" target="_blank" rel="noopener noreferrer">5초 밈으로 놀기 <span aria-hidden="true">↗</span></a><span id="health-badge" class="engine-badge" role="status"><i></i><span>엔진 확인 중</span></span></nav>
+  </header>
+
+  <main>
+    <section class="intro" aria-labelledby="intro-title"><div><p class="eyebrow">MUSIC IN. A WORLD OUT.</p><h1 id="intro-title">한 곡을,<br class="mobile-break"> <span>한 편의 세계로.</span></h1><p class="intro-copy">가사를 읽고, 리듬을 타고, 장면을 이어서.<br>내 음악으로 완성하는 모션그래픽 뮤직비디오.</p></div><div class="edition" aria-label="로컬 제작 실험판">LOCAL STUDIO<br><strong>VOL. 03</strong><span>OPEN SOURCE / MADE TO MOVE</span></div></section>
+
+    <div class="workspace">
+      <section class="composer" aria-labelledby="composer-title">
+        <div class="section-heading"><h2 id="composer-title">오늘의 한 곡</h2><span>01 — INPUT</span></div>
+        <form id="create-form">
+          <label id="dropzone" class="dropzone" for="audio-file"><input id="audio-file" type="file" accept="audio/*,.wav,.mp3,.m4a,.ogg,.flac,.aac,.opus"><span class="upload-icon" aria-hidden="true">♪</span><strong id="file-name">음악을 여기에 놓아 주세요</strong><span id="file-detail">또는 눌러서 파일 선택 · 최대 60초</span><span class="file-types">WAV / MP3 / M4A / FLAC</span></label>
+          <div class="source-actions"><span>아직 음악이 없다면?</span><button id="demo-button" type="button">오리지널 데모 들어보기 <span aria-hidden="true">↗</span></button></div>
+          <p id="source-note" class="source-note" hidden></p><audio id="source-audio" controls preload="metadata" hidden></audio>
+
+          <div class="field"><label for="mv-title">작품 이름 <span>선택</span></label><input id="mv-title" name="title" type="text" maxlength="100" placeholder="Untitled, 혹은 나만의 제목"></div>
+          <fieldset class="theme-field"><legend>어떤 세계를 만들까요?</legend><div class="themes">
+            <label class="theme-option"><input type="radio" name="theme" value="auto" checked><span class="theme-swatch auto" aria-hidden="true"><i></i><b>✳</b></span><span>음악에 맡기기</span></label>
+            <label class="theme-option"><input type="radio" name="theme" value="bloom"><span class="theme-swatch bloom" aria-hidden="true"><b>✿</b></span><span>피어나는 세계</span></label>
+            <label class="theme-option"><input type="radio" name="theme" value="fracture"><span class="theme-swatch fracture" aria-hidden="true"><b>↯</b></span><span>깨지는 세계</span></label>
+            <label class="theme-option"><input type="radio" name="theme" value="orbit"><span class="theme-swatch orbit" aria-hidden="true"><i></i><b>●</b></span><span>맴도는 세계</span></label>
+          </div></fieldset>
+          <details class="lyrics-details"><summary>가사를 직접 넣거나 수정하고 싶어요 <span>선택</span></summary><label for="lyrics">입력하면 자동 전사 대신 이 가사를 사용하고, 음원에 맞춰 단어 시점을 자동 정렬합니다. 최대 6,000자입니다.</label><textarea id="lyrics" maxlength="6000" rows="5" placeholder="비워 두면 음악에서 가사를 자동으로 인식해요."></textarea></details>
+          <button id="create-button" class="create-button" type="submit" disabled><span>뮤직비디오 만들기</span><span aria-hidden="true">↗</span></button>
+          <p class="privacy-note">음악은 만들기를 누를 때 <strong>이 PC의 로컬 제작 서버</strong>로만 전달됩니다. 입력과 완성 파일은 대회 프로젝트 폴더에 보관됩니다. 외부 업로드·로그인 없이 제작해요.</p>
+        </form>
+      </section>
+
+      <section class="screen-section" aria-labelledby="screen-title">
+        <div class="section-heading"><h2 id="screen-title">음악이 펼쳐질 자리</h2><span id="screen-label">02 — THE SCREEN</span></div>
+        <div id="stage" class="stage">
+          <div id="empty-stage" class="empty-stage">
+            <div class="stage-meta"><span>BOP! ORIGINAL MOTION WORLD</span><span>16:9 / 24 FPS</span></div>
+            <svg viewBox="0 0 960 540" role="img" aria-label="분홍색 행성과 꽃 모양을 바라보는 파란 캐릭터. 생성 결과가 아닌 시작 화면."><defs><pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse"><path d="M48 0H0V48" fill="none" stroke="#ddd9ca" stroke-width="1"/></pattern></defs><rect width="960" height="540" fill="#e9edbf"/><rect width="960" height="540" fill="url(#grid)"/><circle cx="722" cy="156" r="105" fill="#fd4e8b"/><ellipse cx="716" cy="165" rx="167" ry="37" fill="none" stroke="#17263f" stroke-width="5" transform="rotate(-26 716 165)"/><path d="M0 421Q200 340 385 414T960 389V540H0Z" fill="#fcf8ea"/><path d="M0 443Q250 378 464 445T960 418" fill="none" stroke="#17263f" stroke-width="3"/><g class="preview-character"><path d="M272 382Q253 290 294 247Q328 213 372 249Q414 285 386 381Z" fill="#3868ee" stroke="#17263f" stroke-width="5"/><ellipse cx="323" cy="295" rx="11" ry="17" fill="#fcf8ea"/><ellipse cx="357" cy="295" rx="11" ry="17" fill="#fcf8ea"/><circle cx="328" cy="297" r="5" fill="#17263f"/><circle cx="362" cy="297" r="5" fill="#17263f"/><path d="M330 329Q343 342 356 328M285 359L247 382M380 357L421 330M299 379L286 414M363 379L380 412" fill="none" stroke="#17263f" stroke-width="5" stroke-linecap="round"/></g><g transform="translate(518 320)"><path d="M0 80V-32" stroke="#17263f" stroke-width="4"/><path d="M0 53Q-53 35-36 15Q-10 5 0 53M0 32Q43 3 51 28Q46 49 0 46" fill="#3868ee" stroke="#17263f" stroke-width="3"/><g class="preview-flower"><path d="M0-45C-48-101-63-27-18-20C-83 6-28 50 0 7C21 60 74 18 25-12C81-40 20-88 0-45Z" fill="#fd4e8b" stroke="#17263f" stroke-width="4"/><circle cy="-18" r="15" fill="#e9edbf" stroke="#17263f" stroke-width="3"/></g></g><path d="M119 122L132 94L145 122L174 135L145 148L132 177L119 148L91 135Z" fill="#fcf8ea" stroke="#17263f" stroke-width="3"/><path d="M821 365L831 343L842 365L864 376L842 387L831 409L821 387L799 376Z" fill="#3868ee" stroke="#17263f" stroke-width="3"/></svg>
+            <div class="empty-caption"><span class="play-mark" aria-hidden="true">▶</span><div><strong>첫 장면은, 당신의 음악에서.</strong><p>시작 화면 · 생성된 영상이 아닙니다</p></div></div>
+          </div>
+          <video id="result-video" controls playsinline preload="metadata" hidden aria-label="완성된 뮤직비디오"></video>
+        </div>
+
+        <div id="job-panel" class="job-panel" hidden aria-live="polite"><div class="job-top"><span id="job-status" class="job-status">준비 중</span><span id="job-elapsed">0:00</span></div><progress id="job-progress" max="1" value="0" aria-label="제작 진행률"></progress><p id="job-message"></p><ol class="job-steps"><li data-step="transcribing">가사 듣기</li><li data-step="directing">장면 연출</li><li data-step="rendering">영상 완성</li></ol><p class="job-help">제작 중에는 이 화면을 열어 두세요. CPU와 곡 길이에 따라 시간이 걸립니다.</p></div>
+        <div id="error-panel" class="error-panel" role="alert" hidden><strong>잠깐, 연결을 확인해 주세요.</strong><p id="error-message"></p><button id="health-retry" type="button">엔진 다시 확인</button></div>
+
+        <div id="result-panel" class="result-panel" hidden><div class="result-heading"><div><p class="eyebrow">YOUR WORLD IS READY.</p><h3 id="result-title">나의 뮤직비디오</h3></div><span id="result-meta"></span></div><div class="result-actions"><a id="download-video" class="primary-download" download="bop-mv.mp4">영상 저장 <span aria-hidden="true">↓</span></a><a id="download-project" download="bop-mv-project.json">연출 JSON <span aria-hidden="true">↓</span></a><a id="view-storyboard" target="_blank" rel="noopener">스토리보드 <span aria-hidden="true">↗</span></a></div><details class="production-details"><summary>이 영상은 어떻게 만들어졌나요?</summary><p id="engine-detail"></p><ul id="result-warnings"></ul><p>일러스트와 동작은 오리지널 벡터 연출 시스템이 만듭니다. 이미지 생성 모델로 만든 영상이 아닙니다.</p></details><figure class="storyboard"><img id="storyboard-image" alt="완성된 뮤직비디오의 장면별 스토리보드" loading="lazy"><figcaption>하나의 곡, 이어지는 장면들.</figcaption></figure></div>
+
+        <div id="concept-strip" class="concept-strip"><div><span>01</span><strong>가사를 읽고</strong><p>노래에서 말과 감정을 찾고</p></div><div><span>02</span><strong>세계를 연출하고</strong><p>캐릭터와 모티프를 이어서</p></div><div><span>03</span><strong>리듬 위에 완성</strong><p>원곡과 함께 MP4로 저장해요</p></div></div>
+      </section>
+    </div>
+    <div class="bottom-note"><span>작은 소리에서 시작되는, 커다란 세계.</span><p>15–45초의 음악으로 시작해 보세요. 이 실험판은 로컬 PC 제작용이며 휴대폰에서 서버에 직접 접속되지는 않습니다.</p></div>
+  </main>
+  <footer><span>BOP! MV / VOICE MOTION LAB</span><span>INDEPENDENT. ORIGINAL. OPEN SOURCE.</span></footer>
+</body>
+</html>

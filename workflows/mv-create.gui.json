@@ -1,0 +1,20 @@
+{
+  "last_node_id": 1,
+  "last_link_id": 0,
+  "nodes": [{
+    "id": 1,
+    "type": "VoiceMotionMVCreate",
+    "pos": [140, 140],
+    "size": [530, 390],
+    "flags": {},
+    "order": 0,
+    "mode": 0,
+    "inputs": [],
+    "outputs": [{"name": "result_json", "type": "STRING", "links": null, "slot_index": 0}],
+    "properties": {"Node name for S&R": "VoiceMotionMVCreate"},
+    "widgets_values": ["replace_with_staged_job", "{\"engine\":\"provided_lyrics\",\"language\":\"ko\",\"text\":\"\",\"segments\":[],\"warnings\":[]}", "auto", 7]
+  }],
+  "links": [], "groups": [], "config": {},
+  "extra": {"voice_motion_note": "Run the MV app to stage source.wav and a real transcript first. Project-only CPU Comfy :8794, official local API v2 proxy :8795. No existing Studio or cloud endpoints."},
+  "version": 0.4
+}

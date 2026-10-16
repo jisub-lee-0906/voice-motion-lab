@@ -1,5 +1,6 @@
 .venv/
 .comfy-venv/
+.mv-venv/
 .cache/
 .runtime/
 models/*

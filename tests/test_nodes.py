@@ -83,7 +83,7 @@ class NodePackStubTests(unittest.TestCase):
         nodes = complete_without_io(extension.get_node_list())
         self.assertEqual(
             [node.define_schema().node_id for node in nodes],
-            ["VoiceMotionAnalyze", "VoiceMotionProject"],
+            ["VoiceMotionAnalyze", "VoiceMotionProject", "VoiceMotionMVCreate"],
         )
 
     def test_analyze_adapter_and_history_contract(self):

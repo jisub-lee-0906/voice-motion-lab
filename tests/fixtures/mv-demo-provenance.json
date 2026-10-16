@@ -1,0 +1,35 @@
+{
+  "synthetic": true,
+  "human_recording": false,
+  "title": "From the Cracks",
+  "music": "Original procedural composition by this project",
+  "vocal": "Synthetic Microsoft Zira TTS, spoken phrases, not natural singing",
+  "duration": 32,
+  "sample_rate": 16000,
+  "lyrics": [
+    {
+      "start": 1.1,
+      "text": "In the quiet city, I carry a little light."
+    },
+    {
+      "start": 6.2,
+      "text": "Through the broken windows, flowers learn to fly."
+    },
+    {
+      "start": 11.0,
+      "text": "I keep the pieces of a dream inside my hands."
+    },
+    {
+      "start": 16.0,
+      "text": "Let the night fall. We will bloom again."
+    },
+    {
+      "start": 21.1,
+      "text": "Round and round, the stars remember every name."
+    },
+    {
+      "start": 26.0,
+      "text": "From the cracks we rise, and find our way back home."
+    }
+  ]
+}

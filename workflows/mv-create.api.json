@@ -1,0 +1,11 @@
+{
+  "mv_create": {
+    "class_type": "VoiceMotionMVCreate",
+    "inputs": {
+      "job_id": "replace_with_staged_job",
+      "transcript_json": "{\"engine\":\"provided_lyrics\",\"language\":\"ko\",\"text\":\"\",\"segments\":[],\"warnings\":[]}",
+      "theme": "auto",
+      "seed": 7
+    }
+  }
+}

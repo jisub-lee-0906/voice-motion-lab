@@ -1,4 +1,36 @@
-# BOP! · Voice Motion Lab
+# BOP! MV · Voice Motion Lab
+
+**음악 하나에서 가사를 듣고, 장면을 연출하고, 2D 뮤직비디오로 완성합니다.**
+
+현재 대회용 개발 중심은 **v0.3 로컬 MV 제작기**입니다. 최대 60초의 음악을
+실제 Qwen3 ASR·강제 정렬 모델로 분석하고, 공식 Comfy SDK → 프로젝트 전용
+API v2 프록시 → 독립 ComfyUI 노드에서 장면 계획과 MP4 제작을 실행합니다.
+첫 시도는 15–45초 구간을 권장합니다. 결과는 960×540 / 24fps MP4,
+스토리보드, 편집 가능한 연출 JSON입니다.
+
+```powershell
+./tools/setup_mv.ps1 -Python python
+./start-mv.ps1 -StartEngines
+```
+
+**http://127.0.0.1:8797/**에서 엽니다. CPU 모델은 이 프로젝트의 `.comfy-venv`,
+SDK와 서버는 `.mv-venv`, 모델 가중치는 `.runtime/mv-models`에 분리합니다.
+ASR·정렬 가중치는 약 3.4GB이며 CPU 2스레드로 순차 실행합니다. 입력과 결과는
+프로젝트 입출력 폴더에 보관하고 외부로 업로드하거나 Git에 넣지 않습니다.
+
+현재 미술은 직접 작성한 절차적 2D 캐릭터·모션을 이용한 **연출 초안**입니다.
+이미지 생성 모델이나 참조 작가 수준의 완성도를 주장하지 않습니다. 실제 UI에서
+32초 합성 데모를 자동 전사·정렬하고 SDK를 통해 13컷 MP4로 완성했습니다.
+해당 실행은 약 46초였으며 일반 곡의 처리 시간을 보장하는 수치는 아닙니다.
+WebM 미리보기까지 포함한 재검증은 약 49초였고 실제 브라우저 재생·MP4 저장·
+새로고침과 앱 재시작 후 결과 복구를 확인했습니다. 자동 테스트 147개를 통과했습니다.
+선택형 CPU OpenVINO 원화 실험은 미술 품질이 부족해 기본 경로에 채택하지 않았습니다.
+
+설치·개인정보·모델 출처·한계는 [MV 제작기 안내](docs/MV_CREATOR.md),
+구현 상태와 제출 전 할 일은 [제작 계획](docs/PRODUCTION_PLAN.md)을 확인하세요.
+기존 ComfyUI Studio와 환경은 변경하거나 사용하지 않습니다.
+
+## 별도 공개 도구: 5초 BOP! v0.2
 
 **캐릭터를 고르고, 5초만 소리 내면, 내 목소리 밈이 됩니다.**
 
@@ -9,12 +41,12 @@
 
 **[로그인 없이 BOP! 체험하기](https://jisub-lee-0906.github.io/voice-motion-lab/)**
 
-현재 **v0.2 공개 체험 빌드**입니다. 기본 화면의 분석과 영상 제작은 브라우저에서
+아래 내용은 별도 **v0.2 공개 체험 빌드**입니다. 기본 화면의 분석과 영상 제작은 브라우저에서
 실행됩니다. 공개 HTTPS 사이트에서 실제 Basic Pitch 분석과 MP4 생성을 확인했습니다.
 실제 휴대폰 Safari와 다양한 사람의 마이크 녹음은 아직 실기기 확인이 남아 있습니다.
 대회 최종 제출본이나 출품 자격이 확인된 빌드가 아닙니다.
 
-## 이렇게 놀아요
+## BOP! v0.2는 이렇게 놀아요
 
 1. 캐릭터 세 개 중 하나를 고릅니다.
 2. **5초 녹음하고 만들기**를 누르고 브라우저의 마이크 권한을 허용합니다.
@@ -34,7 +66,7 @@ MP4를 모든 브라우저에 약속하지 않습니다. 실시간 전환 시 �
 사용합니다. 모바일 화면·터치 조작·`playsinline`을 고려해 구현했으며 실기기
 호환성은 별도 검증 대상입니다.
 
-## 브라우저 안에서 처리합니다
+## BOP! v0.2는 브라우저 안에서 처리합니다
 
 - 방문자에게 Python, ComfyUI, GPU 서버나 계정이 필요하지 않습니다.
   배포자는 정적 파일을 HTTPS로 제공하면 됩니다.
@@ -58,7 +90,7 @@ MP4를 모든 브라우저에 약속하지 않습니다. 실시간 전환 시 �
 마이크 부재, 무음, 중단과 인코딩 실패에 대한 안내·재시도 흐름이 있습니다.
 말의 의미를 이해하는 모델은 아니며, 발성의 시간·음높이·에너지를 모션에 연결합니다.
 
-## 개발용 로컬 실행
+## BOP! v0.2 개발용 로컬 실행
 
 Windows와 Python 3.12 기준입니다. 준비 도구는 이 저장소의 전용 가상환경과
 무시된 런타임 폴더만 사용합니다. 브라우저 기본 모드에 ComfyUI 설치는 필요 없습니다.
@@ -98,34 +130,35 @@ JSON에는 원래 오디오 샘플이 포함됩니다. 기존 합성 제작 결�
 Comfy 경로는 선택 사항입니다. `tools/setup_comfy.ps1`, `start-comfy.ps1`,
 `start.ps1 -WithComfy`는 이 프로젝트의 독립 CPU 환경과 **8794** 포트만 사용합니다.
 현재 고급 Studio의 Comfy 호출은 실제 노드를 실행하는 native `/prompt` 방식입니다.
-**공식 Comfy SDK/API v2 연결은 아직 구현하지 않았습니다.**
-브라우저 기본 모드는 이 경로를 호출하지 않습니다.
-대회 요구사항과 의미 있는 SDK 역할은 [현재 제작 계획](docs/PRODUCTION_PLAN.md)에
-별도로 기록했습니다.
+v0.3 MV 제작기는 별도 :8797 경로에서 공식 Comfy SDK/API v2를 사용하도록
+구현되어 실제 종단 실행을 검증했습니다. 고급 Studio의 기존 native 호출이나 공개 BOP!
+브라우저 모드와 혼동하지 마세요. 공개 기본 모드는 Comfy를 호출하지 않습니다.
 
 ## 격리와 검증
 
 이 프로젝트는 기존 ComfyUI/Studio와 별도입니다. 기존 설치, `.venv`,
 `custom_nodes`, 워크플로우, 공유 모델, 설정과 서버를 변경하거나 이용하지 않습니다.
-Python 설치는 프로젝트 `.venv`와 선택형 `.comfy-venv`에만 합니다. 정리는 직접
+Python 설치는 프로젝트 `.venv`, `.mv-venv`, `.comfy-venv`에만 합니다. 정리는 직접
 만든 파일과 프로세스에만 한정합니다. 더 무거운 실행 전에는 공유 자원을 점검합니다.
 
 ```powershell
 ./.venv/Scripts/python.exe -m unittest discover -s tests -p 'test_*.py' -v
-node --test tests/web/*.test.mjs tests/play/*.test.mjs
+./.mv-venv/Scripts/python.exe -m unittest discover -s tests/mv -p 'test_*.py' -v
+node --test (Get-ChildItem tests -Recurse -Filter '*.test.mjs').FullName
+./tests/mv/test_listener_guards.ps1
 ```
 
 분석 전용 회귀 검증은 합성 자료 6종의 전체 5초 결과를 Python과 비교합니다.
 실제 단일 스레드 WASM도 실행하며 모든 모델 입력 청크의 해시를 대조합니다.
 취소·재시작, 원본 버퍼 보존, 정직한 신호 fallback도 검증합니다. 합성 테스트는
 실제 사람·모바일·공개 서비스의 사용성 검증을 대신하지 않습니다.
-자동 테스트 89개와 합성 스트림의 실제 녹음·분석·MP4 생성, 일반 정적 서버 및
+**v0.2 검증 기록**의 자동 테스트 89개와 합성 스트림의 실제 녹음·분석·MP4 생성, 일반 정적 서버 및
 캐시 후 오프라인 재생성을 확인했습니다. 자세한 근거와 남은 검증은
 `VERIFICATION.md`와 [초기 브라우저 기술 검증](docs/BROWSER_PROOF.md)의 각 기록의
 버전과 범위를 확인해 읽어 주세요.
 
 ## 라이선스
 
-원본 앱·캐릭터·합성 소재와 custom pack은 MIT, Basic Pitch는 Apache-2.0,
+원본 앱·캐릭터·합성 소재와 custom pack은 MIT, Qwen3 ASR·정렬 모델과 Basic Pitch는 Apache-2.0,
 ONNX Runtime Web과 MP4/WebM muxer는 MIT입니다. 별도 선택형 ComfyUI는 GPL-3.0입니다.
 정확한 버전·출처와 보존된 라이선스는 [NOTICE](NOTICE) 및 런타임 manifest에 있습니다.
