@@ -17,11 +17,13 @@ import json
 import math
 import os
 from pathlib import Path
+from pathlib import PureWindowsPath
 import re
 import shlex
 import subprocess
 import time
 import urllib.request
+from urllib.parse import urlsplit
 import uuid
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -230,14 +232,51 @@ $g=@(& nvidia-smi --query-gpu=index,name,memory.free,utilization.gpu,driver_vers
 if($LASTEXITCODE -ne 0 -or -not $g.Count) {throw 'Cannot inspect GPU.'}
 $fields=([string]$g[0]).Split(',') | ForEach-Object {$_.Trim()}
 if($fields.Count -ne 5 -or $fields[0] -ne '0') {throw 'Unexpected GPU inventory.'}
-$apps=@(& nvidia-smi --query-compute-apps=pid,process_name --format=csv,noheader,nounits)
-if($LASTEXITCODE -ne 0) {throw 'Cannot inspect GPU compute processes.'}
-$pids=@();foreach($a in $apps){if($a -match '^\s*(\d+)\s*,'){$pids += [int]$Matches[1]}}
+$xmlRows=@(& nvidia-smi -q -x)
+if($LASTEXITCODE -ne 0 -or -not $xmlRows.Count) {throw 'Cannot inspect typed GPU contexts.'}
+$xmlText=$xmlRows -join "`n"
+if($xmlText.Length -gt 2097152) {throw 'GPU XML exceeds the inspection bound.'}
+$gpuXml=[System.Xml.XmlDocument]::new();$gpuXml.XmlResolver=$null;$gpuXml.LoadXml($xmlText)
+$devices=@($gpuXml.nvidia_smi_log.gpu)
+if($devices.Count -ne 1 -or [string]$devices[0].product_name -ne $fields[1]) {throw 'Ambiguous GPU XML device identity.'}
+$contexts=@();$pids=@();$hashes=@{}
+foreach($context in @($devices[0].processes.process_info)) {
+    if($null -eq $context) {continue}
+    $contextPid=0
+    if(-not [int]::TryParse([string]$context.pid,[ref]$contextPid) -or $contextPid -le 0) {throw 'Invalid GPU context PID.'}
+    $contextType=([string]$context.type).Trim()
+    $process=$all[$contextPid];$executable=$null;$created=$null;$processName=$null;$hash=$null
+    if($process) {
+        $processName=[string]$process.Name
+        if($process.CreationDate) {$created=$process.CreationDate.ToUniversalTime().ToString('o')}
+        if($process.ExecutablePath) {$executable=[string]$process.ExecutablePath}
+    }
+    if($executable) {
+        if(-not $hashes.ContainsKey($executable)) {
+            $hashStream=$null;$hashAlgorithm=$null
+            try {
+                $hashAlgorithm=[System.Security.Cryptography.SHA256]::Create()
+                $hashStream=[System.IO.File]::OpenRead($executable)
+                $hashes[$executable]=([System.BitConverter]::ToString($hashAlgorithm.ComputeHash($hashStream))).Replace('-','').ToLowerInvariant()
+            }
+            catch {$hashes[$executable]=$null}
+            finally {
+                if($hashStream) {$hashStream.Dispose()}
+                if($hashAlgorithm) {$hashAlgorithm.Dispose()}
+            }
+        }
+        $hash=$hashes[$executable]
+    }
+    $contexts += @{pid=$contextPid;xml_type=$contextType;xml_name=[string]$context.process_name;
+      name=$processName;created=$created;executable_path=$executable;sha256=$hash}
+    if($contextType -eq 'C') {$pids += $contextPid}
+}
 $os=Get-CimInstance Win32_OperatingSystem -ErrorAction Stop
 @{listeners=$listeners;processes=@($selected.Values);gpu=@{name=$fields[1];driver=$fields[4];
  free_vram_gib=([double]::Parse($fields[2],[Globalization.CultureInfo]::InvariantCulture)/1024);
  utilization=[double]::Parse($fields[3],[Globalization.CultureInfo]::InvariantCulture);
- free_ram_gib=([double]$os.FreePhysicalMemory/1024/1024);compute_pids=$pids}} | ConvertTo-Json -Depth 6 -Compress
+ free_ram_gib=([double]$os.FreePhysicalMemory/1024/1024);compute_pids=$pids;process_contexts=$contexts;
+ context_source='nvidia-smi XML type + live CIM identity + executable SHA256'}} | ConvertTo-Json -Depth 6 -Compress
 '''
 
 
@@ -265,6 +304,34 @@ def option(argv, name, expected):
     return len(matches) == 1 and matches[0]+1 < len(argv) and normalized(argv[matches[0]+1]) == normalized(str(expected))
 
 
+def venv_redirector_base(environment):
+    """Windows venv child uses home/python.exe, even with a venv creator.
+
+    In nested project venvs, cfg.executable records the creating venv rather
+    than the redirector child. Both declarations must remain explicit and
+    project-controlled; no external cfg or system environment is searched.
+    """
+    path = owned(ROOT/environment/'pyvenv.cfg', ROOT/environment)
+    if not path.is_file() or path.stat().st_size > 8192:
+        raise RuntimeError('Dedicated project pyvenv.cfg is missing or oversized.')
+    values = {}
+    for line in path.read_text(encoding='utf-8-sig').splitlines():
+        if '=' not in line: continue
+        key, value = (part.strip() for part in line.split('=', 1))
+        key = key.casefold()
+        if key in values: raise RuntimeError('Duplicate dedicated pyvenv.cfg field.')
+        values[key] = value
+    home = values.get('home', '')
+    if not PureWindowsPath(home).is_absolute() or values.get('include-system-site-packages', '').casefold() != 'false':
+        raise RuntimeError('Dedicated venv home/isolation configuration is invalid.')
+    base = str(PureWindowsPath(home)/'python.exe')
+    creators = {normalized(base)} | {normalized(str(ROOT/name/'Scripts/python.exe'))
+                                    for name in ('.venv', '.mv-venv', '.gpu-venv')}
+    if normalized(values.get('executable', '')) not in creators:
+        raise RuntimeError('Dedicated venv executable is not its base or a known project creator.')
+    return base
+
+
 def process_proof(state):
     processes = {int(item['pid']): item for item in state['processes']}
     proof = {}
@@ -276,7 +343,7 @@ def process_proof(state):
         owners = {int(item['pid']) for item in listeners}
         if len(owners) != 1:
             raise RuntimeError('Ambiguous benchmark port ownership.')
-        current = next(iter(owners)); visited = set(); chain = []; python_pids = []
+        current = next(iter(owners)); visited = set(); chain = []; python_pids = []; redirector_child = False
         while True:
             if current in visited or current not in processes:
                 raise RuntimeError('Missing or cyclic benchmark launcher ancestry.')
@@ -292,8 +359,15 @@ def process_proof(state):
                 if not python_pids or not option(argv, '-File', ROOT/launcher):
                     raise RuntimeError('Listener is not a descendant of the exact project launcher.')
                 break
-            if process['name'].casefold() != 'python.exe' or not argv or normalized(argv[0]) != normalized(str(ROOT/environment/'Scripts/python.exe')):
+            if process['name'].casefold() != 'python.exe' or not argv:
                 raise RuntimeError('Port owner must use the dedicated project Python entry.')
+            dedicated_python = normalized(str(ROOT/environment/'Scripts/python.exe'))
+            if normalized(argv[0]) != dedicated_python:
+                parent = processes.get(int(process['parent']))
+                parent_argv = tokens(parent['command']) if parent else []
+                if python_pids or current != next(iter(owners)) or not parent or parent['name'].casefold() != 'python.exe' or not parent_argv or normalized(parent_argv[0]) != dedicated_python or argv[1:] != parent_argv[1:] or normalized(argv[0]) != normalized(venv_redirector_base(environment)):
+                    raise RuntimeError('Only one exact configured base child directly below its dedicated venv is permitted.')
+                redirector_child = True
             if not option(argv, '--port', str(port)):
                 raise RuntimeError('Unexpected listener port argument.')
             if port == 8796:
@@ -311,25 +385,124 @@ def process_proof(state):
             if not all(option(argv, name, value) for name, value in expected.items()):
                 raise RuntimeError('Listener paths or upstream target do not match the quality project.')
             python_pids.append(current); current = int(process['parent'])
-        proof[str(port)] = {'owner_pid': next(iter(owners)), 'chain': chain, 'python_pids': python_pids}
+        proof[str(port)] = {'owner_pid': next(iter(owners)), 'chain': chain, 'python_pids': python_pids,
+                            'venv_redirector_child': redirector_child}
     return proof
 
 
-def resource_guard(state, proof, initial):
+def utc_time(value):
+    if not isinstance(value, str): raise RuntimeError('Resource identity requires an explicit UTC timestamp.')
+    result = datetime.fromisoformat(value.replace('Z', '+00:00'))
+    if result.tzinfo is None: raise RuntimeError('Resource timestamps must include their timezone.')
+    return result.astimezone(timezone.utc)
+
+
+def read_resource_lease():
+    path = owned(ROOT/'.runtime/mv-quality/resource-lease.json', ROOT/'.runtime/mv-quality')
+    if not path.exists(): return None
+    if not path.is_file() or path.stat().st_size > 128 * 1024: raise RuntimeError('Invalid resource lease file.')
+    return json.loads(path.read_text(encoding='utf-8-sig'))
+
+
+def validate_resource_lease(lease, now=None):
+    now = now or datetime.now(timezone.utc)
+    if not isinstance(lease, dict) or lease.get('format') != 'voice-motion-quality-resource-lease' or lease.get('version') != 1:
+        raise RuntimeError('An explicit current resource lease is required for non-benchmark GPU contexts.')
+    if lease.get('approved_by') != 'root' or lease.get('user_authorized') is not True or lease.get('scope') != 'isolated-mv-quality-benchmark' or not lease.get('evidence'):
+        raise RuntimeError('Resource lease has no exact root/user authorization scope or evidence.')
+    if not isinstance(lease.get('id'), str) or not re.fullmatch(r'[A-Za-z0-9_-]{8,64}', lease['id']):
+        raise RuntimeError('Resource lease needs an opaque session identifier.')
+    issued, expires = utc_time(lease.get('issued_at')), utc_time(lease.get('expires_at'))
+    if not 0 < (expires-issued).total_seconds() <= 1800 or (issued-now).total_seconds() > 5 or now >= expires:
+        raise RuntimeError('Resource lease is expired, future-dated or longer than 30 minutes.')
+    contexts = lease.get('contexts')
+    if not isinstance(contexts, list) or any(not isinstance(entry, dict) for entry in contexts):
+        raise RuntimeError('Resource lease must contain exact context records.')
+    identifiers = [entry.get('pid') for entry in contexts]
+    if any(type(pid) is not int or pid <= 0 for pid in identifiers) or len(set(identifiers)) != len(identifiers):
+        raise RuntimeError('Resource lease has duplicate or invalid process IDs.')
+    profile = lease.get('profile', 'conservative')
+    if profile == 'controlled_mmap_probe':
+        if lease.get('min_free_ram_gib') != 8 or lease.get('min_followup_ram_gib') != 4:
+            raise RuntimeError('Controlled mmap probe requires its explicit 8/4 GiB RAM bounds.')
+    elif profile != 'conservative': raise RuntimeError('Unknown resource measurement profile.')
+    return {'id': lease['id'], 'profile': profile, 'issued_at': lease['issued_at'], 'expires_at': lease['expires_at'],
+            'fingerprint_sha256': hashlib.sha256(canonical(lease).encode('utf-8')).hexdigest(),
+            'min_free_ram_gib': 8 if profile == 'controlled_mmap_probe' else 16,
+            'min_followup_ram_gib': 4 if profile == 'controlled_mmap_probe' else 2,
+            'measurement_status': 'operator-approved measurement profile; not a proven model minimum'}
+
+
+def classify_gpu_contexts(state, proof=None, lease=None, now=None):
+    contexts = state['gpu'].get('process_contexts')
+    if not isinstance(contexts, list): raise RuntimeError('Typed GPU XML/CIM contexts are unavailable; refusing inference.')
+    own_pids = set(proof['8796']['python_pids']) if proof else set()
+    outside = [entry for entry in contexts if entry.get('pid') not in own_pids]
+    if lease is None: lease = read_resource_lease()
+    lease_info = validate_resource_lease(lease, now) if lease is not None else None
+    if outside and lease_info is None:
+        raise RuntimeError('Another GPU context is present without an explicit current resource lease.')
+    leased = {entry['pid']: entry for entry in lease['contexts']} if lease_info else {}
+    approved = []; seen = set()
+    for current in contexts:
+        pid = current.get('pid'); kind = current.get('xml_type')
+        if type(pid) is not int or pid <= 0 or pid in seen or kind not in ('C', 'G', 'C+G'):
+            raise RuntimeError('Unknown, duplicate or untyped GPU context; refusing inference.')
+        seen.add(pid)
+        if pid in own_pids:
+            approved.append({'pid': pid, 'role': 'verified_own_comfy', 'xml_type': kind}); continue
+        entry = leased.get(pid)
+        if not entry or entry.get('manual_approval') is not True or entry.get('xml_type') != kind or not current.get('name') or not current.get('created'):
+            raise RuntimeError(f'Unknown GPU context PID {pid}; no exact approved session identity.')
+        if utc_time(current['created']) != utc_time(entry.get('created')) or normalized(current['name']) != normalized(str(entry.get('name', ''))):
+            raise RuntimeError(f'GPU process identity changed or PID was reused: {pid}.')
+        role = entry.get('role')
+        if role == 'protected_display':
+            if kind != 'C+G' or current['name'].casefold() not in ('dwm.exe', 'tabtip.exe') or current.get('executable_path') is not None or entry.get('executable_path') is not None or current.get('sha256') is not None or entry.get('sha256') is not None:
+                raise RuntimeError('Protected-display exception requires exact approved inaccessible dwm/TabTip identity.')
+        else:
+            executable = current.get('executable_path'); expected = entry.get('executable_path')
+            digest = current.get('sha256')
+            if not isinstance(executable, str) or not isinstance(expected, str) or not PureWindowsPath(executable).is_absolute() or '*' in expected or '?' in expected or normalized(executable) != normalized(expected) or not isinstance(digest, str) or not re.fullmatch(r'[0-9a-f]{64}', digest) or digest != entry.get('sha256'):
+                raise RuntimeError(f'GPU executable path/hash is not the exact approved identity: {pid}.')
+            if role == 'display':
+                if kind not in ('G', 'C+G'): raise RuntimeError('A pure compute context cannot be disguised as an approved display app.')
+            elif role == 'idle_original_comfy':
+                verified = utc_time(entry.get('verified_at')); issued = utc_time(lease['issued_at'])
+                url = urlsplit(str(entry.get('url', '')))
+                if kind != 'C' or entry.get('queue_empty') is not True or entry.get('models_unloaded') is not True or entry.get('no_new_jobs_during_lease') is not True or not entry.get('evidence') or not 0 <= (issued-verified).total_seconds() <= 120:
+                    raise RuntimeError('Original Comfy context lacks recent idle/unload/reserved-window attestation.')
+                if url.scheme != 'http' or url.hostname not in ('127.0.0.1', 'localhost', '::1') or url.username or url.password or not url.port or url.port in (8796, 8798) or url.path not in ('', '/') or url.query or url.fragment:
+                    raise RuntimeError('Original context lease must identify its separate exact loopback URL.')
+                # Evidence only: never contact the user's original server.
+            else: raise RuntimeError('Unknown GPU context lease role.')
+        approved.append({'pid': pid, 'name': current['name'], 'created': current['created'], 'role': role, 'xml_type': kind})
+    return approved, lease_info
+
+
+def resource_summary(gpu):
+    # Exact executable inventories belong only to the short-lived runtime lease,
+    # not a copied permanent benchmark inventory. Retain counts and lease hash.
+    result = {key: value for key, value in gpu.items() if key != 'process_contexts'}
+    result['observed_context_count'] = len(gpu.get('process_contexts', []))
+    return result
+
+
+def resource_guard(state, proof, initial, lease=None, now=None):
     gpu = state['gpu']
     for key in ('free_vram_gib', 'free_ram_gib', 'utilization'):
         if isinstance(gpu.get(key), bool) or not isinstance(gpu.get(key), (int, float)) or not math.isfinite(gpu[key]):
             raise RuntimeError('Incomplete resource telemetry; refusing GPU submission.')
-    own_pids = set(proof['8796']['python_pids'])
-    foreign = set(gpu['compute_pids']) - own_pids
-    if foreign:
-        raise RuntimeError('Another GPU compute process is active; existing work will not be interrupted.')
+    approved, lease_info = classify_gpu_contexts(state, proof, lease, now)
+    minimum_ram = (lease_info['min_free_ram_gib'] if initial else lease_info['min_followup_ram_gib']) if lease_info else (16 if initial else 2)
     # Immediately after our completed job, the driver's utilization sample can
     # still include that job. Queue idleness and no foreign compute PID remain
     # mandatory; resident weights and that trailing sample are not a new job.
-    if (initial and gpu['utilization'] > 5) or gpu['free_ram_gib'] < (16 if initial else 2) or (initial and gpu['free_vram_gib'] < 12):
+    if (initial and gpu['utilization'] > 5) or gpu['free_ram_gib'] < minimum_ram or (initial and gpu['free_vram_gib'] < 12):
         raise RuntimeError('The approved GPU/RAM resource window is unavailable.')
-    return dict(gpu, check='initial_12GiB_VRAM_16GiB_RAM' if initial else 'same_own_server_cached_weights_allowed')
+    return dict(resource_summary(gpu), check='initial_12GiB_VRAM_profile_RAM' if initial else 'same_own_server_cached_weights_allowed',
+                approved_contexts=approved, resource_lease=lease_info,
+                ram_floor_gib=minimum_ram, ram_floor_basis='operator guard/profile; not official model minimum')
 
 
 class NoRedirect(urllib.request.HTTPRedirectHandler):
@@ -543,7 +716,7 @@ def inspect_png(path, expected_size=None):
     return {'sha256': sha256(path), 'bytes': path.stat().st_size, 'width': size[0], 'height': size[1]}
 
 
-async def run_benchmark(stage='hero', count=None, reference=None, resource_approved=False, timeout=600):
+async def run_benchmark(stage='hero', count=None, reference=None, resource_approved=False, timeout=600, reference_selection='agent_reviewed'):
     if not resource_approved:
         raise RuntimeError('--resource-approved is required before any probe or GPU submission.')
     candidates = build_plan(stage, count)
@@ -557,6 +730,8 @@ async def run_benchmark(stage='hero', count=None, reference=None, resource_appro
         owned(reference_path, ROOT); inspect_png(reference_path)
     elif reference:
         raise ValueError('--reference is only used in the separate edit stage.')
+    if reference_selection not in ('agent_reviewed', 'user_selected'):
+        raise ValueError('Reference selection must identify agent review or explicit user selection.')
     run_id = uuid.uuid4().hex
     directory = owned(ROOT/'output/mv-quality/runs'/run_id, ROOT/'output/mv-quality')
     directory.mkdir(parents=True, exist_ok=False)
@@ -581,7 +756,8 @@ async def run_benchmark(stage='hero', count=None, reference=None, resource_appro
             target.parent.mkdir(parents=True, exist_ok=False)
             with target.open('xb') as output: output.write(reference_path.read_bytes())
             report['reference'] = dict(inspect_png(target), source=str(reference_path.relative_to(ROOT)),
-                                       staged=str(target.relative_to(ROOT)), selection='human_reviewed_explicit_reference')
+                                       staged=str(target.relative_to(ROOT)), selection=reference_selection,
+                                       human_art_approval=reference_selection == 'user_selected')
         async with await make_client() as client:
             for index, candidate in enumerate(candidates):
                 checked = preflight(initial=index == 0, expected_proof=first['proof'])
@@ -635,7 +811,7 @@ async def run_benchmark(stage='hero', count=None, reference=None, resource_appro
                 after = snapshot()
                 if process_proof(after) != first['proof']:
                     raise RuntimeError('Server identity changed before artifact verification completed.')
-                item['resources_after'] = after['gpu']
+                item['resources_after'] = resource_summary(after['gpu'])
                 item.update(success=True, status='generated_awaiting_art_review', elapsed_seconds=time.perf_counter()-tick)
                 save_json(report_path, report)
         report.update(success=True, status='generated_awaiting_art_review', art_review='awaiting_art_review')
@@ -674,9 +850,27 @@ def main(argv=None):
     parser.add_argument('--stage', choices=('hero', 'edit'), default='hero')
     parser.add_argument('--count', type=int, help='At most 2 hero candidates or 3 reference edits; no retries.')
     parser.add_argument('--reference', type=Path, help='Reviewed canonical PNG under project input/mv-quality or output/mv-quality; edit stage only.')
+    parser.add_argument('--reference-selection', choices=('agent_reviewed', 'user_selected'), default='agent_reviewed',
+                        help='Record who selected the provisional reference; agent review never implies user art approval.')
     parser.add_argument('--timeout', type=int, default=600, help='Per-candidate wait bound (30..1800 seconds); timeout does not kill jobs.')
+    parser.add_argument('--resource-status', action='store_true', help='Read-only XML/CIM/lease check for project setup/start; no SDK or inference.')
+    parser.add_argument('--resource-check', action='store_true', help='Same read-only check, exit nonzero if resource policy refuses.')
     args = parser.parse_args(argv)
     if not 30 <= args.timeout <= 1800: parser.error('--timeout must be 30..1800 seconds')
+    if args.resource_status or args.resource_check:
+        if args.run or args.dry_run: parser.error('Resource inspection cannot be combined with --run or --dry-run.')
+        if args.resource_check and not args.resource_approved: parser.error('--resource-check requires --resource-approved.')
+        try:
+            state = snapshot()
+            try:
+                value = resource_guard(state, None, True)
+                value['allowed'] = True
+            except (RuntimeError, ValueError, KeyError, TypeError) as error:
+                value = dict(resource_summary(state['gpu']), allowed=False, reason=str(error))
+            print(json.dumps(value, ensure_ascii=False, allow_nan=False))
+            return 0 if value['allowed'] or args.resource_status else 1
+        except Exception as error:
+            print(json.dumps({'allowed': False, 'reason': str(error)}, ensure_ascii=False)); return 1
     if args.dry_run or not args.run:
         plan = build_plan(args.stage, args.count)
         print(json.dumps({'dry_run': True, 'stage': args.stage, 'network_used': False, 'gpu_used': False,
@@ -684,7 +878,7 @@ def main(argv=None):
                           'output': 'output/mv-quality/runs/<fresh-id>', 'automatic_retries': 0}, ensure_ascii=False, indent=2))
         return 0
     try:
-        asyncio.run(run_benchmark(args.stage, args.count, args.reference, args.resource_approved, args.timeout))
+        asyncio.run(run_benchmark(args.stage, args.count, args.reference, args.resource_approved, args.timeout, args.reference_selection))
         return 0
     except KeyboardInterrupt:
         print('Interrupted. No server or job was globally interrupted; inspect the recorded exact workflow ID.'); return 130

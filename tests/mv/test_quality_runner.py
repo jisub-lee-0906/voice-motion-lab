@@ -2,6 +2,7 @@
 import asyncio
 from contextlib import redirect_stdout
 import copy
+from datetime import datetime, timezone
 import importlib.util
 import io
 import json
@@ -38,7 +39,27 @@ def fake_state(root):
                 {'pid': 201, 'parent': 200, 'name': 'python.exe', 'command': proxy, 'created': '2026-10-17T01:00:04Z'},
                 {'pid': 200, 'parent': 1, 'name': 'powershell.exe', 'command': 'powershell.exe -File '+quote(root/'start-mv-quality-proxy.ps1'), 'created': '2026-10-17T01:00:03Z'}],
             'gpu': {'name': 'test-only GPU', 'driver': 'mock', 'free_vram_gib': 13., 'free_ram_gib': 20.,
-                    'utilization': 0., 'compute_pids': [101]}}
+                    'utilization': 0., 'compute_pids': [101], 'process_contexts': [
+                        {'pid': 101, 'name': 'python.exe', 'created': '2026-10-17T01:00:02Z', 'xml_type': 'C',
+                         'executable_path': str(root/'.gpu-venv/Scripts/python.exe'), 'sha256': 'a'*64}]}}
+
+
+def fake_lease():
+    contexts = [
+        {'pid': 301, 'name': 'Aside.exe', 'created': '2026-10-17T00:00:01Z', 'xml_type': 'C+G',
+         'executable_path': 'C:/Program Files/Aside/Aside.exe', 'sha256': 'b'*64, 'role': 'display', 'manual_approval': True},
+        {'pid': 302, 'name': 'TabTip.exe', 'created': '2026-10-17T00:00:02Z', 'xml_type': 'C+G',
+         'executable_path': None, 'sha256': None, 'role': 'protected_display', 'manual_approval': True},
+        {'pid': 303, 'name': 'python.exe', 'created': '2026-10-17T00:00:03Z', 'xml_type': 'C',
+         'executable_path': 'C:/Original/standalone-env/python.exe', 'sha256': 'c'*64,
+         'role': 'idle_original_comfy', 'manual_approval': True, 'url': 'http://127.0.0.1:8188',
+         'queue_empty': True, 'models_unloaded': True, 'no_new_jobs_during_lease': True,
+         'verified_at': '2026-10-17T01:00:09Z', 'evidence': 'unit-only root attestation; no real original API call'},
+    ]
+    return {'format': 'voice-motion-quality-resource-lease', 'version': 1, 'id': 'unit-lease-123',
+            'issued_at': '2026-10-17T01:00:10Z', 'expires_at': '2026-10-17T01:10:10Z', 'approved_by': 'root',
+            'user_authorized': True, 'scope': 'isolated-mv-quality-benchmark', 'evidence': 'unit-only permission',
+            'profile': 'controlled_mmap_probe', 'min_free_ram_gib': 8, 'min_followup_ram_gib': 4, 'contexts': contexts}
 
 
 class FakeJob:
@@ -82,6 +103,10 @@ class FakeClient:
 
 
 class QualityRunnerTests(unittest.TestCase):
+    def setUp(self):
+        lease_patch = patch.object(runner, 'read_resource_lease', return_value=None)
+        lease_patch.start(); self.addCleanup(lease_patch.stop)
+
     def test_dry_run_and_default_do_not_probe_write_or_import_sdk(self):
         for argv in ([], ['--dry-run'], ['--dry-run', '--stage', 'edit']):
             with patch.object(runner, 'snapshot', side_effect=AssertionError('resource probe')), \
@@ -127,6 +152,42 @@ class QualityRunnerTests(unittest.TestCase):
             altered = copy.deepcopy(state); mutate(altered)
             with self.subTest(mutation=index), self.assertRaises(RuntimeError): runner.process_proof(altered)
 
+    def test_windows_venv_redirector_child_requires_exact_home_direct_parent_and_arguments(self):
+        with tempfile.TemporaryDirectory(dir=PROJECT/'temp') as directory:
+            root = Path(directory); base = 'C:/Runtime/python.exe'
+            for environment, creator in (('.gpu-venv', '.mv-venv'), ('.mv-venv', '.venv')):
+                folder = root/environment; folder.mkdir()
+                (folder/'pyvenv.cfg').write_text('home = C:/Runtime\ninclude-system-site-packages = false\n'
+                                                +'executable = '+str(root/creator/'Scripts/python.exe')+'\n', encoding='utf-8')
+            state = fake_state(root)
+            for index, environment, created in ((0, '.gpu-venv', '2026-10-17T01:00:01.5Z'),
+                                                 (2, '.mv-venv', '2026-10-17T01:00:03.5Z')):
+                owner = state['processes'][index]; parent = copy.deepcopy(owner)
+                parent.update(pid=owner['pid']+1000, created=created)
+                owner['parent'] = parent['pid']
+                owner['command'] = owner['command'].replace('"'+str(root/environment/'Scripts/python.exe')+'"', '"'+base+'"', 1)
+                state['processes'].append(parent)
+            with patch.object(runner, 'ROOT', root):
+                proof = runner.process_proof(state)
+                self.assertEqual(proof['8796']['python_pids'], [101, 1101])
+                self.assertEqual(proof['8798']['python_pids'], [201, 1201])
+                self.assertTrue(proof['8796']['venv_redirector_child'])
+                mutations = [lambda s: s['processes'][0].update(command=s['processes'][0]['command'].replace(base, 'C:/Other/python.exe')),
+                             lambda s: s['processes'][4].update(command=s['processes'][4]['command'].replace('.gpu-venv', '.venv')),
+                             lambda s: s['processes'][4].update(command=s['processes'][4]['command']+' --extra'),
+                             lambda s: s['processes'][4].update(command=s['processes'][4]['command'].replace(str(root/'.gpu-venv/Scripts/python.exe'), base)),
+                             lambda s: s['processes'][4].update(created='2026-10-17T01:00:09Z')]
+                for index, mutate in enumerate(mutations):
+                    altered = copy.deepcopy(state); mutate(altered)
+                    with self.subTest(mutation=index), self.assertRaises(RuntimeError): runner.process_proof(altered)
+                config = root/'.gpu-venv/pyvenv.cfg'; original = config.read_text()
+                for value in (original.replace('= false', '= true'), original.replace('home = C:/Runtime', 'home = C:/Other'),
+                              original.replace(str(root/'.mv-venv/Scripts/python.exe'), 'C:/Other/python.exe')):
+                    config.write_text(value)
+                    with self.assertRaises(RuntimeError): runner.process_proof(state)
+                config.unlink()
+                with self.assertRaises(RuntimeError): runner.process_proof(state)
+
     def test_exact_graph_rejects_review_bypass_and_gui_drift(self):
         graph = runner.read_json(PROJECT/'workflows/mv-quality-t2i.api.json')
         def extra_scheduler(value):
@@ -155,13 +216,48 @@ class QualityRunnerTests(unittest.TestCase):
     def test_resources_allow_only_proven_own_cuda_pid_and_initial_free_window(self):
         state = fake_state(PROJECT); proof = runner.process_proof(state)
         runner.resource_guard(state, proof, True)
-        state['gpu']['compute_pids'].append(999)
+        state['gpu']['process_contexts'].append({'pid': 999, 'xml_type': 'C'})
         with self.assertRaisesRegex(RuntimeError, 'Another GPU'): runner.resource_guard(state, proof, False)
-        state['gpu']['compute_pids'] = [101]; state['gpu']['free_vram_gib'] = 2.
+        state['gpu']['process_contexts'].pop(); state['gpu']['free_vram_gib'] = 2.
         with self.assertRaises(RuntimeError): runner.resource_guard(state, proof, True)
         runner.resource_guard(state, proof, False)  # Own resident weights, same proven idle server.
         state['gpu']['free_ram_gib'] = float('nan')
         with self.assertRaisesRegex(RuntimeError, 'telemetry'): runner.resource_guard(state, proof, False)
+
+    def test_xml_display_and_idle_original_require_current_exact_lease(self):
+        lease = fake_lease(); state = fake_state(PROJECT); now = datetime(2026, 10, 17, 1, 0, 11, tzinfo=timezone.utc)
+        state['gpu']['process_contexts'].extend(copy.deepcopy(lease['contexts']))
+        state['gpu']['free_ram_gib'] = 10
+        with self.assertRaisesRegex(RuntimeError, 'resource lease'):
+            runner.resource_guard(state, runner.process_proof(state), True, now=now)
+        with patch.object(runner, 'local_json', side_effect=AssertionError('original API must never be called')):
+            value = runner.resource_guard(state, runner.process_proof(state), True, lease=lease, now=now)
+        self.assertEqual(value['ram_floor_gib'], 8)
+        self.assertEqual([entry['role'] for entry in value['approved_contexts']],
+                         ['verified_own_comfy', 'display', 'protected_display', 'idle_original_comfy'])
+        self.assertIn('not a proven model minimum', value['resource_lease']['measurement_status'])
+        state['gpu']['free_ram_gib'] = 3.9
+        with self.assertRaisesRegex(RuntimeError, 'window'):
+            runner.resource_guard(state, runner.process_proof(state), False, lease=lease, now=now)
+
+    def test_resource_lease_rejects_reused_pid_path_hash_unknown_gui_and_stale_attestation(self):
+        lease = fake_lease(); state = fake_state(PROJECT)
+        state['gpu']['process_contexts'].extend(copy.deepcopy(lease['contexts']))
+        now = datetime(2026, 10, 17, 1, 0, 11, tzinfo=timezone.utc)
+        mutations = [lambda s, l: s['gpu']['process_contexts'][1].update(created='2026-10-17T00:00:09Z'),
+                     lambda s, l: s['gpu']['process_contexts'][1].update(executable_path='C:/Other/Aside.exe'),
+                     lambda s, l: s['gpu']['process_contexts'][1].update(sha256='d'*64),
+                     lambda s, l: s['gpu']['process_contexts'].append({'pid': 999, 'xml_type': 'C+G'}),
+                     lambda s, l: s['gpu']['process_contexts'][2].update(name='unknown-protected.exe'),
+                     lambda s, l: s['gpu']['process_contexts'][1].update(xml_type='C'),
+                     lambda s, l: l.update(expires_at='2026-10-17T01:00:10Z'),
+                     lambda s, l: l['contexts'][2].update(models_unloaded=False),
+                     lambda s, l: l['contexts'][2].update(no_new_jobs_during_lease=False),
+                     lambda s, l: l['contexts'][2].update(verified_at='2026-10-17T00:00:00Z')]
+        for index, mutate in enumerate(mutations):
+            altered = copy.deepcopy(state); changed = copy.deepcopy(lease); mutate(altered, changed)
+            with self.subTest(mutation=index), self.assertRaises(RuntimeError):
+                runner.resource_guard(altered, runner.process_proof(altered), True, lease=changed, now=now)
 
     def test_snapshot_is_bounded_utf8_read_only_process_inspection(self):
         state = fake_state(PROJECT)
@@ -265,6 +361,8 @@ class QualityRunnerAsyncTests(unittest.IsolatedAsyncioTestCase):
         references = {job.graph['14']['inputs']['image'] for job, _ in client.submitted}
         self.assertEqual(len(references), 1); self.assertEqual(runner.sha256(reference), original_hash)
         self.assertEqual(report['reference']['sha256'], original_hash)
+        self.assertEqual(report['reference']['selection'], 'agent_reviewed')
+        self.assertFalse(report['reference']['human_art_approval'])
         self.assertEqual([item['artifact']['height'] for item in report['candidates']], [576]*3)
 
     async def test_approval_and_edit_reference_are_required_before_any_resource_probe(self):

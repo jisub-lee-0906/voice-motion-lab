@@ -90,7 +90,7 @@ https://github.com/lovit/soynlp/blob/master/LICENSE
 
 Windows Korean fonts, when available, are used through read-only local paths.
 No proprietary font file is copied into the source repository or static site.
-The MV character, scenery, animation rules and synthetic demo composition are
+The procedural CPU MV character, scenery, animation rules and synthetic demo composition are
 original authored project assets. They do not redistribute reference music,
 lyrics, artwork, or characters from the inspiration videos.
 
@@ -105,17 +105,29 @@ tokenizers are separately installed optional packages. No optional model weights
 or generated illustration are committed or included in the default pipeline.
 https://huggingface.co/OpenVINO/LCM_Dreamshaper_v7-int8-ov
 
-A separate, not-yet-executed GPU illustration benchmark is prepared for
+A separate GPU illustration benchmark was exercised locally with
 Black Forest Labs FLUX.2-klein-4b-fp8 and Comfy-Org/flux2-klein-4B
 (Qwen3-4B text encoder and FLUX.2 VAE). These pinned repositories declare
 Apache-2.0; exact revisions, SHA256s and unmodified upstream license downloads
 are recorded in tools/setup_mv_quality.py and docs/MV_MODEL_RESEARCH.md.
-No benchmark model weight is committed or bundled with the public browser app.
+The three pinned weight files total 12,451,817,860 bytes. Original upstream
+licenses and SHA256 verification records are retained in the ignored project
+runtime. The controlled run generated five private still PNGs, not an animated
+MV or an approved art pack. No benchmark model weight or generated image is
+committed or bundled with the public browser app.
 https://huggingface.co/black-forest-labs/FLUX.2-klein-4b-fp8
 https://huggingface.co/Comfy-Org/flux2-klein-4B
+
+The isolated GPU environment separately installs PyTorch 2.14.1+cu130 and
+torchvision 0.29.1+cu130 with their CUDA 13.0 runtime dependencies. Upstream and
+bundled third-party license notices remain in those installed distributions;
+the repository does not vendor or relicense the GPU runtime or its binaries.
+Actual dependency/BF16/image-run checks are described in VERIFICATION.md.
 
 The benchmark API and editable GUI graphs adapt the official Comfy workflow
 templates at revision 04a508b31bec1818e48122ca0761c1de4140a234 (MIT).
 Original attribution is preserved in workflows/mv-quality-upstream.LICENSE;
 source hashes and adaptations are recorded in workflows/mv-quality-provenance.json.
+Preparation-time provenance is preserved separately from subsequent actual run
+reports; its original gpu_tested:false field is not rewritten as an execution log.
 https://github.com/Comfy-Org/workflow_templates

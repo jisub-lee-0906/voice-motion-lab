@@ -1,26 +1,21 @@
 # Read-only resource checks; importing this file starts no process or inference.
+$script:MVQualityGuardRoot=Split-Path -Parent $PSScriptRoot
 function Get-MVQualityResourceState {
-    $qualityRows=@(& nvidia-smi --query-gpu=index,name,memory.free,utilization.gpu,driver_version --format=csv,noheader,nounits)
-    if ($LASTEXITCODE -ne 0 -or -not $qualityRows.Count) { throw 'Cannot inspect GPU resources; refusing setup/start.' }
-    $qualityFields=([string]$qualityRows[0]).Split(',') | ForEach-Object {$_.Trim()}
-    if ($qualityFields.Count -ne 5 -or $qualityFields[0] -ne '0') { throw 'Unexpected GPU inventory; refusing implicit device selection.' }
-    $qualityFree=[double]::Parse($qualityFields[2],[Globalization.CultureInfo]::InvariantCulture)
-    $qualityUse=[double]::Parse($qualityFields[3],[Globalization.CultureInfo]::InvariantCulture)
-    $qualityApps=@(& nvidia-smi --query-compute-apps=pid,process_name --format=csv,noheader,nounits)
-    if ($LASTEXITCODE -ne 0) { throw 'Cannot inspect active GPU compute processes; refusing setup/start.' }
-    $qualityApps=@($qualityApps | Where-Object {$_ -match '^\s*\d+\s*,'})
-    $qualityOS=Get-CimInstance Win32_OperatingSystem -ErrorAction Stop
-    return [pscustomobject]@{gpu=$qualityFields[1];free_vram_gib=($qualityFree/1024);
-        utilization=$qualityUse;driver=$qualityFields[4];compute_process_count=$qualityApps.Count;
-        free_ram_gib=([double]$qualityOS.FreePhysicalMemory/1024/1024)}
+    # Share the exact XML/CIM/path/hash/short-lease policy with the SDK runner.
+    # This stdlib-only mode reads telemetry; no SDK import, GPU allocation or API.
+    $qualityPython=Join-Path $script:MVQualityGuardRoot '.mv-venv/Scripts/python.exe'
+    $qualityRunner=Join-Path $script:MVQualityGuardRoot 'tools/run_mv_quality.py'
+    if (-not (Test-Path -LiteralPath $qualityPython) -or -not (Test-Path -LiteralPath $qualityRunner)) {throw 'Project resource-inspection Python/source is missing.'}
+    $qualityJson=@(& $qualityPython $qualityRunner --resource-status)
+    if ($LASTEXITCODE -ne 0) {throw ('Read-only quality resource inspection failed: '+($qualityJson -join ' '))}
+    return (($qualityJson -join "`n") | ConvertFrom-Json -ErrorAction Stop)
 }
 
 function Assert-MVQualityResourceWindow([switch]$ResourceApproved) {
     if (-not $ResourceApproved) { throw 'An explicit resource-window approval is required. Never unload or interrupt existing work.' }
     $qualityState=Get-MVQualityResourceState
-    if ($qualityState.free_vram_gib -lt 12 -or $qualityState.free_ram_gib -lt 16 -or
-        $qualityState.utilization -gt 5 -or $qualityState.compute_process_count -ne 0) {
-        throw ('Shared resources are occupied: '+($qualityState | ConvertTo-Json -Compress)+'. No install/start performed; never stop other work.')
+    if ($qualityState.allowed -ne $true) {
+        throw ('Shared resource policy refused: '+($qualityState.reason)+'. No install/start performed; never stop other work.')
     }
     return $qualityState
 }
