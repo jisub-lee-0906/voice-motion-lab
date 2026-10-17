@@ -1,0 +1,75 @@
+{
+  "format": "voice-motion-color-script",
+  "version": 2,
+  "status": "planning_not_rendered",
+  "human_art_approval": false,
+  "basis": "Original color direction informed by observed color relationships; hexadecimal values and area targets are our design choices, not sampled reference colors.",
+  "palette": {
+    "foreground": "#141020",
+    "cool_shadow": "#32245D",
+    "warm_key": "#F24A32",
+    "warm_space": "#F09575",
+    "paper_highlight": "#FFE7A0"
+  },
+  "identity_policy": "Stable character design and material colors; visible colors may change coherently with scene lighting.",
+  "scope": "Prepared generation prompts only. No runtime color-control renderer, LUT or color pass has been implemented.",
+  "shots": [
+    {
+      "id": "S01_extract",
+      "time_range_seconds": [
+        0,
+        4
+      ],
+      "story": "concealed light",
+      "value_area_target_percent": {
+        "dark": 70,
+        "mid": 25,
+        "highlight": 5
+      },
+      "direction": "S01 color staging: deep eggplant-black foreground, blue-violet middle distance, a lighter subdued violet far plane. A narrow vermilion key light catches the pocket and extracting hand. Most of the frame remains dark; the one paper star is the smallest and brightest accent. Keep the trousers distinct from the floor with a restrained violet edge. The warm light is still confined to the action area."
+    },
+    {
+      "id": "S02_release",
+      "time_range_seconds": [
+        4,
+        9
+      ],
+      "story": "light released",
+      "value_area_target_percent": {
+        "dark": 45,
+        "mid": 45,
+        "highlight": 10
+      },
+      "direction": "S02 color staging: the close-up enlarges the vermilion-lit sleeve against deep blue-violet shadows. The hand is a warm peach midtone, visibly darker than the pale ivory star; preserve a crisp separation silhouette. The star is the brightest small shape, not a white glow hiding the fingertips. A trace of warm light starts extending from the star onto the fingers and sleeve at release; the rest of the background stays cool."
+    },
+    {
+      "id": "S03_door",
+      "time_range_seconds": [
+        9,
+        15
+      ],
+      "story": "new space revealed",
+      "value_area_target_percent": {
+        "dark": 35,
+        "mid": 50,
+        "highlight": 15
+      },
+      "direction": "S03 color staging: retain blue-violet exterior shadows while the doorway reveals a warm apricot space with at least two visible depth planes. The interior is a colored midtone, not a blank white rectangle. Warm light spreads onto the floor and the courier coat edge, expanding the warm area established in earlier shots. Reserve the highest values for the single ivory star and small parts of the door rim; preserve the dark exterior around the opening."
+    }
+  ],
+  "measurement_note": "Value-area targets are thumbnail design guides, not measured pixel proportions, automatic scores, model guarantees or established reference statistics.",
+  "timing_note": "The ranges follow the scene study. Actual music cue synchronization is pending; light changes attach to extraction, release and door opening.",
+  "review": [
+    "Readable focus in grayscale",
+    "Selective color contrast rather than a global saturation increase",
+    "Light affects actor and space together",
+    "Star remains distinct from skin",
+    "Door interior has colored depth rather than clipped white",
+    "Three shots develop one color story"
+  ],
+  "previous_v1_evidence": {
+    "hero_run": "afb670840e3d497898c9cbe5af5c870a",
+    "edit_run": "f17c039c90b64ef2ae1beeb55845a4fa",
+    "status": "Technical still generation only; v1 art gate not passed. Raw v1 prompts and images remain unchanged in their run directories."
+  }
+}

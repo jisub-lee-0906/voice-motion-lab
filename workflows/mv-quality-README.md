@@ -5,6 +5,14 @@ reference-edit PNGs on RTX 5070 Ti 16GB. This is a five-still technical experime
 the art gate, actual animation, a 15-second MV and audio-only automatic directing
 remain incomplete. The CPU MV app and the user's existing Studio stay separate.
 
+The current source prompts now prepare **color direction v2**, described in
+`mv-color-script.v2.json` and [the color board](../docs/mv-color-script.html).
+The five recorded images below used v1 prompts; their raw run files are unchanged.
+No v2 images have been generated. The v2 colors and value-area targets are original
+design choices, not sampled reference RGBs, measured statistics or model guarantees.
+API/GUI prompts remain synchronized. A colored-light plan is not an implemented
+time-varying lighting renderer or an art-gate pass.
+
 ## Verified runtime and resource policy
 
 - Dedicated `.gpu-venv`, Python 3.12 x64.
